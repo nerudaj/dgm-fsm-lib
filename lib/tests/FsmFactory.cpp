@@ -118,6 +118,22 @@ TEST_CASE("[FsmFactory]", "[FsmFactory]")
 		REQUIRE(logic3_callCnt == 1u);
 	}
 
+	SECTION("Can deal with empty behavior")
+	{
+		loader.states = {
+			{0, {
+				.transitions = {},
+				.behaviors = {},
+				.defaultTransition = 0
+			}}
+		};
+
+		REQUIRE_NOTHROW([&] ()
+		{
+			dgm::fsm::Fsm<Blackboard, unsigned> fsm = factory.loadFromFile("unused");
+		} ());
+	}
+
 	SECTION("Throws if referencing not-registered logic")
 	{
 		loader.states = {
@@ -157,22 +173,6 @@ TEST_CASE("[FsmFactory]", "[FsmFactory]")
 				.transitions = {},
 				.behaviors = { "logic1" },
 				.defaultTransition = 1
-			}}
-		};
-
-		REQUIRE_THROWS([&] ()
-		{
-			dgm::fsm::Fsm<Blackboard, unsigned> fsm = factory.loadFromFile("unused");
-		} ());
-	}
-
-	SECTION("Throws if logics are empty")
-	{
-		loader.states = {
-			{0, {
-				.transitions = {},
-				.behaviors = {},
-				.defaultTransition = 0
 			}}
 		};
 

@@ -57,7 +57,7 @@ namespace dgm
 			}
 
 			[[nodiscard]]
-			std::string getSchema() const
+			std::string getAnnotations() const
 			{
 				const auto serializedPredicates = keysToString(predicates, ",\n");
 				const auto seralizedLogics = keysToString(logics, ",\n");
@@ -65,7 +65,7 @@ namespace dgm
 				return std::vformat(
 					"{{\n"
 					"\"predicates\": [\n{}\n]\n"
-					"\"logics\": [\n{}\n]\n"
+					"\"behaviors\": [\n{}\n]\n"
 					"}}", std::make_format_args(
 						serializedPredicates,
 						seralizedLogics));

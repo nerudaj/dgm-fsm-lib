@@ -138,14 +138,19 @@ namespace dgm
 				currentState = state;
 			}
 
-			void enableLogging(
+			void setLogHelpers(
 				std::map<StateType, std::string>&& stateToString,
-				std::function<std::string(const BlackboardType&)> blackboardToString,
-				std::ostream& logger = std::cout)
+				std::function<std::string(const BlackboardType&)> blackboardToString)
 			{
-				loggingEnabled = true;
 				this->stateToString = stateToString;
 				this->blackboardToString = blackboardToString;
+			}
+			
+			void setLogging(
+				bool enabled,
+				std::ostream& logger = std::cout)
+			{
+				loggingEnabled = enabled;
 				log = logger;
 			}
 
