@@ -86,6 +86,7 @@ namespace dgm
 					return id;
 				};
 
+				fsm::Logic<BlackboardType> doNothingStub = [] (BlackboardType&) {};
 				for (auto&& [stateId, state] : states)
 				{
 					auto& fstate = finalStates[stateId];
@@ -97,12 +98,9 @@ namespace dgm
 							getCheckedStateId(transition.second) });
 					}
 
-					if (state.behaviors.empty())
-					{
-						throw std::runtime_error("Behaviors must not be empty");
-					}
-
-					Logic<BlackboardType> finalLogic = logics.at(state.behaviors[0]);
+					Logic<BlackboardType> finalLogic = state.behaviors.empty()
+						? doNothingStub
+						: logics.at(state.behaviors[0]);
 
 					for (unsigned i = 1; i < state.behaviors.size(); i++)
 					{
@@ -115,7 +113,17 @@ namespace dgm
 					fstate.targetState = getCheckedStateId(state.defaultTransition);
 				}
 
-				return dgm::fsm::Fsm(std::move(finalStates));
+				auto fsm = dgm::fsm::Fsm(std::move(finalStates));
+
+				// Compute and set log helpers
+				std::map<unsigned, std::string> stateToString;
+				for (auto&& [index, state] : states)
+				{
+					stateToString[index] = state.name;
+				}
+				fsm.setStateToStringHelper(std::move(stateToString));
+
+				return fsm;
 			}
 
 			Factory(LoaderInterface& loader)

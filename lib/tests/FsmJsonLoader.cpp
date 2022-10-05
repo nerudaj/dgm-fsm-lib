@@ -96,6 +96,7 @@ TEST_CASE("loadFromStream", "[FsmJsonLoader]")
 		REQUIRE(states[0].behaviors[0] == "doNothing1");
 		REQUIRE(states[0].behaviors[1] == "doNothing2");
 		REQUIRE(states[0].defaultTransition == 0u);
+		REQUIRE(states[0].name == "StateStart");
 
 		REQUIRE(states[1].transitions.size() == 2u);
 		REQUIRE(states[1].transitions[0].first == "cond2");
@@ -104,10 +105,12 @@ TEST_CASE("loadFromStream", "[FsmJsonLoader]")
 		REQUIRE(states[1].transitions[1].second == 0u);
 		REQUIRE(states[1].behaviors[0] == "logic");
 		REQUIRE(states[1].defaultTransition == 2u);
+		REQUIRE(states[1].name == "StateLogic");
 
 		REQUIRE(states[2].transitions.size() == 0u);
 		REQUIRE(states[2].behaviors[0] == "doNothing");
 		REQUIRE(states[2].defaultTransition == 2u);
+		REQUIRE(states[2].name == "StateFinish");
 	}
 
 	SECTION("Throws if nonexistent state is referenced")

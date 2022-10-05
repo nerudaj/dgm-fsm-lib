@@ -22,6 +22,7 @@ namespace dgm
 			 */
 			struct State
 			{
+				std::string name = "";
 				std::vector<std::pair<std::string, unsigned>> transitions = {};
 				std::vector<std::string> behaviors = {};
 				unsigned defaultTransition = 0;

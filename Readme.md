@@ -225,3 +225,6 @@ As mentioned before, state names are converted into integers. Those integers wil
 
 ## Logging
 
+Library has some basic logging capabilities that can be enabled by `fsm::Fsm::setLoggingEnabled`, which also allows you to define your log target (by default stdout).
+
+Optionally you can also call `fsm::Fsm::setStateToStringHelper` so state names are pretty printed in the logs. When FSM is created via factory, it will be set to log the names as they are defined in the source file.

@@ -76,7 +76,6 @@ namespace dgm
 			bool loggingEnabled = false;
 			std::reference_wrapper<std::ostream> log = std::cout;
 			std::map<StateType, std::string> stateToString;
-			std::function<std::string(const BlackboardType&)> blackboardToString = [] (const BlackboardType&) -> std::string { return "NOT IMPLEMENTED"; };
 
 		private:
 			[[nodiscard]]
@@ -92,20 +91,19 @@ namespace dgm
 				if (!loggingEnabled) return;
 
 				log.get() << std::format(
-					"FSM::update:\n\tState = {}\n\tBlackboard = {}\n",
-					getStateName(currentState),
-					blackboardToString(b));
+					"FSM::update(State = {}):\n",
+					getStateName(currentState));
 			}
 
-			void logTransitionTaken(bool defaultTransition = false)
+			void logTransitionTaken(bool defaultTransition = false, bool loop = false)
 			{
 				if (!loggingEnabled)
 					return;
 
-				log.get() << std::format(
-					"  --> transitioning to {} {}\n  ",
-					getStateName(currentState),
-					defaultTransition ? "(default transition)" : "");
+				log.get() << std::format("  {}, {}{}\n",
+					defaultTransition ? "behavior executed" : "condition hit",
+					loop ? "looping" : "jumping to ",
+					loop ? "" : getStateName(currentState));
 			}
 
 		public:
@@ -128,9 +126,9 @@ namespace dgm
 				}
 
 				states[currentState].logic(blackboard);
+				const bool looping = currentState == states[currentState].targetState;
 				currentState = states[currentState].targetState;
-
-				logTransitionTaken(true);
+				logTransitionTaken(true, looping);
 			}
 
 			void reset(StateType state) noexcept
@@ -138,14 +136,12 @@ namespace dgm
 				currentState = state;
 			}
 
-			void setLogHelpers(
-				std::map<StateType, std::string>&& stateToString,
-				std::function<std::string(const BlackboardType&)> blackboardToString)
+			void setStateToStringHelper(
+				std::map<StateType, std::string>&& stateToString)
 			{
 				this->stateToString = stateToString;
-				this->blackboardToString = blackboardToString;
 			}
-			
+
 			void setLogging(
 				bool enabled,
 				std::ostream& logger = std::cout)

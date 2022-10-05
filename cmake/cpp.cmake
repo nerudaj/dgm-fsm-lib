@@ -10,7 +10,7 @@ endif()
 set ( CMAKE_CXX_STANDARD_REQUIRED  ON )
 set ( CMAKE_CXX_EXTENSIONS         OFF )
 set ( MY_CXX_COMPILE_FEATURES      cxx_generic_lambdas cxx_range_for cxx_strong_enums )
-set ( CXX_COMPILE_OPTIONS          /Wall /WX /MP )
+set ( CXX_COMPILE_OPTIONS          /W4 /WX /MP )
 
 if (NOT CMAKE_DEBUG_POSTFIX)
 	set(CMAKE_DEBUG_POSTFIX "-d")

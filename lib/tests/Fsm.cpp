@@ -89,24 +89,68 @@ TEST_CASE("Functionality", "[Fsm/FsmBuilder]")
 		REQUIRE(logic1_cnt == 0u);
 		REQUIRE(logic2_cnt == 1u);
 	}
-}
 
-TEST_CASE("CanCompileBuilderSyntax", "[Fsm/FsmBuilder]")
-{
-	using dgm::fsm::decorator::Merge;
+	SECTION("Properly logs behaviour")
+	{
+		auto blackboard = Blackboard{
+			.CSV = "a,b\nd\n"
+		};
 
-	auto fsm = dgm::fsm::Builder<Blackboard, State>()
-		.with(State::Start)
-		.when(CsvParser::isEof).goTo(State::End)
-		.orWhen(CsvParser::isComma).goTo(State::CommaFound)
-		.orWhen(CsvParser::isNewline).goTo(State::NewlineFound)
-		.otherwiseExec(CsvParser::advanceChar).andLoop()
-		.with(State::CommaFound)
-		.exec(CsvParser::storeWord).andGoTo(State::Start)
-		.with(State::NewlineFound)
-		.exec(Merge<Blackboard>(
-			CsvParser::handleNewline,
-			CsvParser::storeWord)
-		).andGoTo(State::Start)
-		.build();
+		using dgm::fsm::decorator::Merge;
+
+		auto fsm = dgm::fsm::Builder<Blackboard, State>()
+			.with(State::Start)
+			.when(CsvParser::isEof).goTo(State::End)
+			.orWhen(CsvParser::isComma).goTo(State::CommaFound)
+			.orWhen(CsvParser::isNewline).goTo(State::NewlineFound)
+			.otherwiseExec(CsvParser::advanceChar).andLoop()
+			.with(State::CommaFound)
+			.exec(CsvParser::storeWord).andGoTo(State::Start)
+			.with(State::NewlineFound)
+			.exec(Merge<Blackboard>(
+				CsvParser::handleNewline,
+				CsvParser::storeWord)
+			).andGoTo(State::Start)
+			.build();
+
+		std::stringstream log;
+
+		fsm.setStateToStringHelper({
+			{State::Start, "Start"},
+			{State::CommaFound, "CommaFound"},
+			{State::NewlineFound, "NewlineFound"},
+			{State::End, "End"}
+			});
+		fsm.setLogging(true, log);
+
+		do
+		{
+			fsm.update(blackboard);
+		} while (fsm.getState() != State::End);
+
+		const std::string refLog =
+			R"(FSM::update(State = Start):
+  behavior executed, looping
+FSM::update(State = Start):
+  condition hit, jumping to CommaFound
+FSM::update(State = CommaFound):
+  behavior executed, jumping to Start
+FSM::update(State = Start):
+  behavior executed, looping
+FSM::update(State = Start):
+  condition hit, jumping to NewlineFound
+FSM::update(State = NewlineFound):
+  behavior executed, jumping to Start
+FSM::update(State = Start):
+  behavior executed, looping
+FSM::update(State = Start):
+  condition hit, jumping to NewlineFound
+FSM::update(State = NewlineFound):
+  behavior executed, jumping to Start
+FSM::update(State = Start):
+  condition hit, jumping to End
+)";
+
+		REQUIRE(log.str() == refLog);
+	}
 }

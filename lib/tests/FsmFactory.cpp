@@ -134,6 +134,37 @@ TEST_CASE("[FsmFactory]", "[FsmFactory]")
 		} ());
 	}
 
+	SECTION("Properly sets log helpers for state names")
+	{
+		loader.states = {
+			{ 0, {
+				.name = "Start",
+				.transitions = {},
+				.behaviors = {},
+				.defaultTransition = 1
+			}},
+			{ 1, {
+				.name = "End",
+				.transitions = {},
+				.behaviors = {},
+				.defaultTransition = 0
+			}}
+		};
+
+		dgm::fsm::Fsm<Blackboard, unsigned> fsm = factory.loadFromFile("unused");
+
+		std::stringstream log;
+		fsm.setLogging(true, log);
+		fsm.update(blackboard);
+		fsm.update(blackboard);
+
+		REQUIRE(log.str() == R"(FSM::update(State = Start):
+  behavior executed, jumping to End
+FSM::update(State = End):
+  behavior executed, jumping to Start
+)");
+	}
+
 	SECTION("Throws if referencing not-registered logic")
 	{
 		loader.states = {

@@ -29,6 +29,8 @@ StateMap dgm::fsm::JsonLoader::loadFromStream(std::istream& stream) const
 	currentIndex = 0;
 	for (auto&& state : json)
 	{
+		result[currentIndex].name = state["name"];
+
 		for (auto&& transition : state["transitions"])
 		{
 			result[currentIndex].transitions.push_back(
