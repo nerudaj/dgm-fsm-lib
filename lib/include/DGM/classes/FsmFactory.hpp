@@ -3,9 +3,9 @@
 #include <string>
 #include <map>
 
-#include <Fsm.hpp>
-#include <FsmLoader.hpp>
-#include <FsmDecorators.hpp>
+#include <DGM/classes/Fsm.hpp>
+#include <DGM/classes/FsmLoader.hpp>
+#include <DGM/classes/FsmDecorators.hpp>
 
 namespace dgm
 {

@@ -8,7 +8,8 @@ include_directories ( "${JSON_FOLDER}/include" )
 file (
 	GLOB LIB_HEADERS
 	CONFIGURE_DEPENDS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/DGM/*.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/DGM/classes/*.hpp"
 )
 
 file (

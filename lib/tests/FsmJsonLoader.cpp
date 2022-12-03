@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <FsmJsonLoader.hpp>
+#include <DGM/classes/FsmJsonLoader.hpp>
 
 TEST_CASE("loadFromStream", "[FsmJsonLoader]")
 {

@@ -1,7 +1,5 @@
 #include <catch.hpp>
-#include <Fsm.hpp>
-#include <FsmBuilder.hpp>
-#include <FsmDecorators.hpp>
+#include <DGM/fsm.hpp>
 #include "CsvParser.hpp"
 
 enum class State

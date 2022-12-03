@@ -1,4 +1,4 @@
-#include <FsmJsonLoader.hpp>
+#include <DGM/classes/FsmJsonLoader.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 

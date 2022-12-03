@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Fsm.hpp"
+#include <DGM/classes/Fsm.hpp>
 
 namespace dgm
 {

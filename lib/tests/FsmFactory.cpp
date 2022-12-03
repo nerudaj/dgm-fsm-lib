@@ -1,5 +1,5 @@
 #include <catch.hpp>
-#include <FsmFactory.hpp>
+#include <DGM/classes/FsmFactory.hpp>
 
 using dgm::fsm::Factory;
 
@@ -34,17 +34,17 @@ TEST_CASE("[FsmFactory]", "[FsmFactory]")
 	factory.registerPredicate("cond1", [&] (const Blackboard&) -> bool
 	{
 		cond1_callCnt++;
-		return false;
+	return false;
 	});
 	factory.registerPredicate("cond2", [&] (const Blackboard&) -> bool
 	{
 		cond2_callCnt++;
-		return false;
+	return false;
 	});
 	factory.registerPredicate("cond3", [&] (const Blackboard&) -> bool
 	{
 		cond3_callCnt++;
-		return false;
+	return false;
 	});
 
 	factory.registerLogic("logic1", [&] (Blackboard&) { logic1_callCnt++; });
