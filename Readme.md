@@ -1,3 +1,5 @@
+[![CI](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml)
+
 # dgm-fsm-lib
 
 This is a C++ library meant for building and running Final State Machines, with the emphasis on their usage in videogame AI. While FSMs are quite simple structures to implement, the code usually quickly devolves into spaghetti mess. This library enforces one particular paradigm to how FSM should look like so the code can stay consistent and hopefully clean.
@@ -6,8 +8,8 @@ This is a C++ library meant for building and running Final State Machines, with 
 
  * [FSM architecture](#fsm-architecture)
  * [How to build the FSM](#how-to-build-the-fsm)
-	* [dgm::fsm::Builder](#dgm-fsm-builder)
-	* [dgm::fsm::Factory](#dgm-fsm-factory)
+	* [dgm::fsm::Builder](#dgmfsmbuilder)
+	* [dgm::fsm::Factory](#dgmfsmfactory)
 
 ## FSM architecture
 
@@ -140,7 +142,7 @@ auto buildFsm() {
 
 As you can see, `Blackboard` and `State` are required template parameters for the builder (and FSM itself) so typechecking can be performed. The parser logic should be pretty obvious from the FSM structure. Note use of the `Merge` decorator to fuse two primitives together to make more complicated behaviour. Also note that decorators require explicit template instantiation since C++ type deduction system is sometimes garbage.
 
-Returned object is your fsm. You can use `reset` to set to any state you need. By default it will be set to the default value of the `State` enum (`Start` in this case). Call `update` to perform single FSM "tick".
+Returned object is your fsm. You can use `setState` to set to any state you need. By default it will be set to the default value of the `State` enum (`Start` in this case). Call `update` to perform single FSM "tick".
 
 ### dgm::fsm::Factory
 

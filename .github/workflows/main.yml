@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_DIR: ${{github.workspace}}/vsbuild
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.9
+      with:
+        cmake-version: '3.23.2'
+
+    - name: Use cmake
+      run: cmake --version
+
+    - name: Configure CMake
+      run: |
+        mkdir "${{env.BUILD_DIR}}"
+        cd "${{env.BUILD_DIR}}"
+        cmake ..
+      shell: cmd
+
+    - name: Build
+      working-directory: ${{env.BUILD_DIR}}
+      run: |
+        cmake --build . --config Debug
+        cmake --build . --config Release
+      shell: cmd
+
+    - name: Test
+      working-directory: ${{env.BUILD_DIR}}
+      run: |
+        ctest -C Debug
+        ctest -C Release
+      shell: cmd
+      
+    - name: Pack
+      working-directory: ${{env.BUILD_DIR}}
+      run: cpack
+      
+    - name: Store artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dgm-fsm-lib
+        path: ${{env.BUILD_DIR}}/*.zip
+        retention-days: 5

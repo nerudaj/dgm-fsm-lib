@@ -2,14 +2,18 @@
 
 #include "Fsm.hpp"
 
-namespace dgm {
-	namespace fsm {
-		template<class BlackboardType, EnumConcept StateType>
+namespace dgm
+{
+	namespace fsm
+	{
+		template<class BlackboardType, StateTypeConcept StateType>
 		class Builder;
 
-		namespace builders {
-			template<class BlackboardType, EnumConcept StateType>
-			class DefaultTransitionBuilder final {
+		namespace builders
+		{
+			template<class BlackboardType, StateTypeConcept StateType>
+			class DefaultTransitionBuilder final
+			{
 				Builder<BlackboardType, StateType> origBuilder;
 				std::vector<Transition<BlackboardType, StateType>> transitions;
 				Logic<BlackboardType> logic;
@@ -21,9 +25,11 @@ namespace dgm {
 					Logic<BlackboardType> logic)
 					: origBuilder(origBuilder)
 					, transitions(transitions)
-					, logic(logic) {}
+					, logic(logic)
+				{}
 
-				auto andGoTo(StateType state) {
+				auto andGoTo(StateType state)
+				{
 					origBuilder.addState(
 						origBuilder.getCurrentlyAddedState(),
 						State<BlackboardType, StateType>({
@@ -34,7 +40,8 @@ namespace dgm {
 					return std::move(origBuilder);
 				}
 
-				auto andLoop() {
+				auto andLoop()
+				{
 					origBuilder.addState(
 						origBuilder.getCurrentlyAddedState(),
 						State<BlackboardType, StateType>({
@@ -50,8 +57,9 @@ namespace dgm {
 			template<class BlackboardType, typename StateType>
 			class TransitionBuilder;
 
-			template<class BlackboardType, EnumConcept StateType>
-			class StateBuilder final {
+			template<class BlackboardType, StateTypeConcept StateType>
+			class StateBuilder final
+			{
 				Builder<BlackboardType, StateType> origBuilder;
 				std::vector<Transition<BlackboardType, StateType>> transitions;
 
@@ -60,16 +68,19 @@ namespace dgm {
 					Builder<BlackboardType, StateType>&& origBuilder,
 					std::vector<Transition<BlackboardType, StateType>> transitions)
 					: origBuilder(origBuilder)
-					, transitions(transitions) {}
+					, transitions(transitions)
+				{}
 
-				auto orWhen(Condition<BlackboardType> condition) {
+				auto orWhen(Condition<BlackboardType> condition)
+				{
 					return TransitionBuilder<BlackboardType, StateType>(
 						std::move(origBuilder),
 						transitions,
 						condition);
 				}
 
-				auto otherwiseExec(Logic<BlackboardType> logic) {
+				auto otherwiseExec(Logic<BlackboardType> logic)
+				{
 					return DefaultTransitionBuilder<BlackboardType, StateType>(
 						std::move(origBuilder),
 						transitions,
@@ -78,7 +89,8 @@ namespace dgm {
 			};
 
 			template<class BlackboardType, typename StateType>
-			class TransitionBuilder final {
+			class TransitionBuilder final
+			{
 				Builder<BlackboardType, StateType> origBuilder;
 				std::vector<Transition<BlackboardType, StateType>> transitions;
 				Condition<BlackboardType> condition;
@@ -90,9 +102,11 @@ namespace dgm {
 					Condition<BlackboardType> condition)
 					: origBuilder(origBuilder)
 					, transitions(transitions)
-					, condition(condition) {}
+					, condition(condition)
+				{}
 
-				auto goTo(StateType state) {
+				auto goTo(StateType state)
+				{
 					transitions.push_back(Transition<BlackboardType, StateType>(condition, state));
 					return StateBuilder<BlackboardType, StateType>(
 						std::move(origBuilder),
@@ -100,22 +114,26 @@ namespace dgm {
 				}
 			};
 
-			template<class BlackboardType, EnumConcept StateType>
-			class EmptyStateBuilder final {
+			template<class BlackboardType, StateTypeConcept StateType>
+			class EmptyStateBuilder final
+			{
 				Builder<BlackboardType, StateType> origBuilder;
 
 			public:
 				EmptyStateBuilder(Builder<BlackboardType, StateType>&& origBuilder)
-					: origBuilder(origBuilder) {}
+					: origBuilder(origBuilder)
+				{}
 
-				auto when(Condition<BlackboardType> condition) {
+				auto when(Condition<BlackboardType> condition)
+				{
 					return TransitionBuilder<BlackboardType, StateType>(
 						std::move(origBuilder),
 						{},
 						condition);
 				}
 
-				auto exec(Logic<BlackboardType> logic) {
+				auto exec(Logic<BlackboardType> logic)
+				{
 					return DefaultTransitionBuilder<BlackboardType, StateType>(
 						std::move(origBuilder),
 						{},
@@ -124,27 +142,32 @@ namespace dgm {
 			};
 		}
 
-		template<class BlackboardType, EnumConcept StateType>
-		class Builder final {
+		template<class BlackboardType, StateTypeConcept StateType>
+		class Builder final
+		{
 		private:
 			std::map<StateType, State<BlackboardType, StateType>> states;
 			StateType currentlyAddedState;
 
 		public:
-			auto with(StateType state) {
+			auto with(StateType state)
+			{
 				currentlyAddedState = state;
 				return builders::EmptyStateBuilder<BlackboardType, StateType>(std::move(*this));
 			}
 
-			StateType getCurrentlyAddedState() const {
+			StateType getCurrentlyAddedState() const
+			{
 				return currentlyAddedState;
 			}
 
-			void addState(StateType code, State<BlackboardType, StateType> state) {
+			void addState(StateType code, State<BlackboardType, StateType> state)
+			{
 				states[code] = state;
 			}
 
-			auto build() {
+			auto build()
+			{
 				return Fsm<BlackboardType, StateType>(std::move(states));
 			}
 		};

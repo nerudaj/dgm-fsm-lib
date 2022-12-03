@@ -8,24 +8,25 @@
 #include <format>
 #include <ostream>
 #include <iostream>
+#include <type_traits>
 
 namespace dgm
 {
 	namespace fsm
 	{
 		template<typename T>
-		concept EnumConcept = true;//std::is_enum_v<T>;
+		concept StateTypeConcept = std::is_scoped_enum_v<T> || (std::is_arithmetic_v<T> && std::is_unsigned_v<T>);
 
 		template<class BlackboardType>
 		using Condition = std::function<bool(const BlackboardType&)>;
 
-		template<class BlackboardType, EnumConcept StateType>
+		template<class BlackboardType, StateTypeConcept StateType>
 		using Transition = std::pair<Condition<BlackboardType>, StateType>;
 
 		template<class BlackboardType>
 		using Logic = std::function<void(BlackboardType&)>;
 
-		template<class BlackboardType, EnumConcept StateType>
+		template<class BlackboardType, StateTypeConcept StateType>
 		struct State
 		{
 			std::vector<Transition<BlackboardType, StateType>> transitions;
@@ -65,7 +66,7 @@ namespace dgm
 		 *    true and transitions, or default logic executes and then transitions (keeping the current state
 		 *    is also transition). This prevents FSM from freezing the app by constantly looping.
 		 */
-		template<class BlackboardType, EnumConcept StateType>
+		template<class BlackboardType, StateTypeConcept StateType>
 		class Fsm final
 		{
 		private:
@@ -86,7 +87,7 @@ namespace dgm
 					: "UNDEFINED(" + std::to_string(static_cast<int>(state)) + ")";
 			}
 
-			void logCurrentState(const BlackboardType& b)
+			void logCurrentState()
 			{
 				if (!loggingEnabled) return;
 
@@ -113,7 +114,7 @@ namespace dgm
 
 			void update(BlackboardType& blackboard)
 			{
-				logCurrentState(blackboard);
+				logCurrentState();
 
 				for (auto&& transition : states[currentState].transitions)
 				{
@@ -131,7 +132,7 @@ namespace dgm
 				logTransitionTaken(true, looping);
 			}
 
-			void reset(StateType state) noexcept
+			void setState(StateType state) noexcept
 			{
 				currentState = state;
 			}

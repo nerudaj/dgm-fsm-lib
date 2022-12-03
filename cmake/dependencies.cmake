@@ -1,4 +1,4 @@
-set ( JSON_VERSION  "3.7.3" )
+set ( JSON_VERSION  "3.11.2" )
 set ( CATCH_VERSION "2.10.2" )
 
 set ( JSON_URL  "https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/include.zip" )
