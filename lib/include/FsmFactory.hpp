@@ -54,16 +54,10 @@ namespace dgm
 			[[nodiscard]]
 			std::string getAnnotations() const
 			{
-				const auto serializedPredicates = keysToString(predicates, ",\n");
-				const auto seralizedLogics = keysToString(logics, ",\n");
-
-				return std::vformat(
-					"{{\n"
-					"\"predicates\": [\n{}\n]\n"
-					"\"behaviors\": [\n{}\n]\n"
-					"}}", std::make_format_args(
-						serializedPredicates,
-						seralizedLogics));
+				return priv::getAnnotations(
+					priv::getMapKeys(predicates),
+					priv::getMapKeys(logics)
+				);
 			}
 
 			[[nodiscard]]
