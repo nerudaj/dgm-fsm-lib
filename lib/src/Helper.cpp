@@ -1,7 +1,7 @@
 #include <DGM/classes/Helper.hpp>
 
 std::vector<unsigned> dgm::fsm::compileDestinations(
-    const Destination& destination, const StateIndex& index)
+    const Destination& destination, const detail::StateIndex& index)
 {
     if (destination.primary.empty()) return {};
     if (destination.secondary.empty())
