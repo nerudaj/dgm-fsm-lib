@@ -15,7 +15,7 @@ namespace dgm
             {
             public:
                 StateIndex() = default;
-                StateIndex(StateIndex&&) = delete;
+                StateIndex(StateIndex&&) = default;
                 StateIndex(const StateIndex&) = delete;
 
             public:
