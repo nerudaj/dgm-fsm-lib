@@ -1,11 +1,19 @@
 #include <DGM/classes/Helper.hpp>
 
-std::vector<unsigned> dgm::fsm::compileDestinations(
-    const Destination& destination, const detail::StateIndex& index)
+dgm::fsm::detail::CompiledTransition dgm::fsm::detail::compileTransition(
+    const TransitionContext& destination, const StateIndex& index)
 {
-    if (destination.primary.empty()) return {};
     if (destination.secondary.empty())
-        return { index.getStateIndex(destination.primary) };
+        if (destination.primary.empty())
+            return {};
+        else
+            return { index.getStateIndex(destination.primary) };
     return { index.getStateIndex(destination.primary),
              index.getStateIndex(destination.secondary) };
+}
+
+std::string dgm::fsm::detail::createFullStateName(
+    const MachineId& machineName, const StateId& stateName)
+{
+    return machineName + ":" + stateName;
 }

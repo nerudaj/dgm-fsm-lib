@@ -122,9 +122,9 @@ namespace dgm
                 auto goToState(StateId name)
                 {
                     context.getCurrentlyBuiltState().conditions.push_back(
-                        ConditionalTransition {
+                        ConditionalTransitionContext {
                             .condition = condition,
-                            .destination = Destination {
+                            .destination = TransitionContext {
                                 .primary = createFullStateName(
                                     context.currentlyBuiltMachine, name) } });
                     return StateBuilder<BbT, IsSubmachine>(std::move(context));
@@ -134,10 +134,10 @@ namespace dgm
                     MachineId machineName, StateId stateName)
                 {
                     context.getCurrentlyBuiltState().conditions.push_back(
-                        ConditionalTransition {
+                        ConditionalTransitionContext {
                             .condition = std::move(condition),
                             .destination =
-                                Destination {
+                                TransitionContext {
                                     .primary = createFullStateName(
                                         machineName,
                                         context.machines.at(machineName)
@@ -152,7 +152,7 @@ namespace dgm
                 auto finish()
                 {
                     context.getCurrentlyBuiltState().conditions.push_back(
-                        ConditionalTransition {
+                        ConditionalTransitionContext {
                             .condition = std::move(condition),
                         });
                     return StateBuilder<BbT, IsSubmachine>(std::move(context));
@@ -356,7 +356,7 @@ namespace dgm
                     return MainBuilder<BbT>(BuilderContext<BbT> {
                         .errorCondition = std::move(condition),
                         .errorDestination =
-                            Destination {
+                            TransitionContext {
                                 .primary =
                                     createFullStateName("__main__", name),
                             },

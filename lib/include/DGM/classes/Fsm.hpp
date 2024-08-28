@@ -24,36 +24,12 @@ namespace dgm
         class [[nodiscard]] Fsm final
         {
         private:
-            std::vector<Transition> compileTransitions(
-                const std::vector<ConditionalTransition<BbT>>& transitions,
-                const StateIndex& index)
-            {
-                return transitions
-                       | std::views::transform(
-                           [&](ConditionalTransition& transition)
-                           {
-                               return Transition {
-                                   .onConditionHit =
-                                       std::move(transition.condition),
-                                   .destinations = compileDestinations(
-                                       transition.destination, index),
-                               };
-                           });
-            }
 
         public:
             explicit Fsm(BuilderContext<BbT>&& context)
             {
-                auto&& index = StateIndex();
-
-                for (auto& [machineName, machineContext] : machines)
-                {
-                    for (auto& [stateName, stateContext] : machine.states)
-                    {
-                        index.addNameToIndex(detail::createFullStateName(
-                            machineName, stateName));
-                    }
-                }
+                auto&& index =
+                    detail::createStateIndexFromBuilderContext(context);
 
                 states.resize(index.getSize());
 
@@ -62,8 +38,8 @@ namespace dgm
                     assert(context.errorDestination.secondary.empty());
                     globalErrorTransition = Transition {
                         .onConditionHit = std::move(context.errorCondition),
-                        .destinations = compileDestinations(
-                            context.errorDestination, index),
+                        .destinations =
+                            compileTransition(context.errorDestination, index),
                     };
                 }
 
@@ -75,11 +51,11 @@ namespace dgm
                             index.getStateIndex(detail::createFullStateName(
                                 machineName, stateName));
                         states[idx] = State {
-                            .transitions = compileTransitions(
+                            .transitions = compileAllConditionalTransitions(
                                 stateContext.conditions, index),
                             .executeBehavior = std::move(stateContext.action),
-                            .destinations =
-                                convertDestinations(stateContext.destination),
+                            .destinations = compileTransition(
+                                stateContext.destination, index),
                         };
                     }
                 }
@@ -120,12 +96,6 @@ namespace dgm
             // void tickUntilBehaviorExecuted(Blackboard& blackboard);
 
         private:
-            struct Transition
-            {
-                Condition<BbT> onConditionHit;
-                std::vector<unsigned> destinations;
-            };
-
             struct State
             {
                 std::vector<Transition> transitions;
