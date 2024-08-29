@@ -10,6 +10,8 @@ namespace dgm
 {
     namespace fsm
     {
+        // TODO: move all to detail
+
         template<class T>
         concept BlackboardTypeConcept = true;
 

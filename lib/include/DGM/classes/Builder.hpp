@@ -383,11 +383,11 @@ namespace dgm
                 return detail::MainBuilder<BbT>(BuilderContext<BbT> {});
             }
 
-            auto withGlobalErrorCondition(Condition<BbT>&& condition)
+            /*auto withGlobalErrorCondition(Condition<BbT>&& condition)
             {
                 return detail::GlobalErrorConditionBuilder(
                     std::move(condition));
-            }
+            }*/
         };
     } // namespace fsm
 } // namespace dgm

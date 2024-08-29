@@ -17,7 +17,7 @@ TEST_CASE("[Helper]")
 
         SECTION("When no destination is present")
         {
-            REQUIRE(compileTransition(TransitionContext {}, index).empty());
+            REQUIRE(compileTransition(TransitionContext {}, index).isEmpty());
         }
 
         SECTION("When only one destination is present")
@@ -25,7 +25,7 @@ TEST_CASE("[Helper]")
             auto&& dest =
                 compileTransition(TransitionContext { .primary = "a" }, index);
 
-            REQUIRE(dest.size() == 1u);
+            REQUIRE(dest.getSize() == 1u);
             REQUIRE(dest[0] == 0u);
         }
 
@@ -34,7 +34,7 @@ TEST_CASE("[Helper]")
             auto&& dest = compileTransition(
                 TransitionContext { .primary = "a", .secondary = "b" }, index);
 
-            REQUIRE(dest.size() == 2u);
+            REQUIRE(dest.getSize() == 2u);
             REQUIRE(dest[0] == 0u);
             REQUIRE(dest[1] == 1u);
         }
