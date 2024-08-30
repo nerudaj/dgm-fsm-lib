@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DGM/classes/BuilderContext.hpp>
+#include <DGM/classes/Compiler.hpp>
 #include <DGM/classes/Error.hpp>
 #include <DGM/classes/Helper.hpp>
 #include <DGM/classes/StateIndex.hpp>
@@ -31,7 +32,8 @@ namespace dgm
                 auto&& index =
                     detail::createStateIndexFromBuilderContext(context);
 
-                states = detail::compileMachine(context, index);
+                entryStateIdx = detail::getEntryStateIdx(context, index);
+                states = detail::Compiler::compileMachine(context, index);
                 stateIdToName = index.getIndexedStateNames();
             }
 
@@ -39,27 +41,42 @@ namespace dgm
             Fsm(const Fsm&) = delete;
 
         public:
+            /**
+             *  Sets up blackboard so the current state is the entry
+             *  state of the main machine
+             */
+            void start(BbT& blackboard)
+            {
+                blackboard.__stateIdxs = { entryStateIdx };
+            }
+
             void tick(BbT& blackboard)
             {
-                /*
-                // TODO: pop stateid
+                if (blackboard.__stateIdxs.empty()) return;
 
-                unsigned stateId = 0;
-                assert(states.size() > stateId);
-                const auto& state = states.at[stateId];
+                auto currentStateIdx = detail::popTopState(blackboard);
 
-                for (const auto& transition : transitions)
+                assert(currentStateIdx < states.size());
+                auto& state = states[currentStateIdx];
+
+                for (const auto& condition : state.conditionalTransitions)
                 {
-                    if (transition.onConditionHit(blackboard))
+                    if (condition.onConditionHit(blackboard))
                     {
-                        // todo: take transition
+                        detail::executeTransition(
+                            blackboard, condition.transition);
                         return;
                     }
                 }
 
                 state.executeBehavior(blackboard);
-                // TODO: take default transition
-                */
+                detail::executeTransition(blackboard, state.defaultTransition);
+            }
+
+            [[nodiscard]] constexpr bool
+            isFinished(const Blackboard& blackboard) const noexcept
+            {
+                return blackboard.__stateIdxs.empty();
             }
 
             // void tickUntilBehaviorExecuted(Blackboard& blackboard);
@@ -67,6 +84,7 @@ namespace dgm
         private:
             std::vector<std::string> stateIdToName;
             std::vector<detail::CompiledState<BbT>> states;
+            size_t entryStateIdx;
         };
     } // namespace fsm
 } // namespace dgm

@@ -24,7 +24,7 @@ namespace dgm
             using Action = std::function<void(BbT&)>;
 
             template<BlackboardTypeConcept BbT>
-            using Condition = std::function<void(const BbT&)>;
+            using Condition = std::function<bool(const BbT&)>;
         } // namespace detail
     }     // namespace fsm
 } // namespace dgm

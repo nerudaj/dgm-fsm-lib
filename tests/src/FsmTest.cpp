@@ -1,4 +1,4 @@
-#include "Blackboard.hpp"> "
+#include "Blackboard.hpp"
 #include "CsvParser.hpp"
 #include <DGM/classes/Builder.hpp>
 #include <DGM/classes/Fsm.hpp>
@@ -15,7 +15,8 @@ TEST_CASE("[FSM]")
             .done()
         .withMainMachine()
             .withEntryState("Start")
-                .when(isEscapeChar).goToMachineAndThenToState("Shifter", "Escaped")
+                .when(isEof).finish()
+                .orWhen(isEscapeChar).goToMachineAndThenToState("Shifter", "Escaped")
                 .orWhen(isSeparatorChar).goToState("SeparatorChar")
                 .orWhen(isNewlineChar).goToState("NewlineChar")
                 .otherwiseExec(advanceChar).andLoop()
@@ -37,4 +38,17 @@ TEST_CASE("[FSM]")
             .done()
         .build();
     // clang-format on
+
+    auto&& bb = Blackboard {
+        .data = "abc,cde,efg\nabc,cde,efg\n",
+    };
+
+    fsm.start(bb);
+
+    while (!fsm.isFinished(bb))
+    {
+        fsm.tick(bb);
+    }
+
+    // TODO: tick until finished or errored
 }

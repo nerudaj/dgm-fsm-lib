@@ -37,64 +37,22 @@ namespace dgm
                 return index;
             }
 
-            CompiledTransition compileTransition(
-                const TransitionContext& destination, const StateIndex& index);
+            [[nodiscard]] size_t popTopState(BlackboardBase& bb);
 
-            template<BlackboardTypeConcept BbT>
-            std::vector<CompiledConditionalTransition<BbT>>
-            compileAllConditionalTransitions(
-                std::vector<ConditionalTransitionContext<BbT>>& transitions,
-                const StateIndex& index)
+            constexpr static void executeTransition(
+                BlackboardBase& bb, const CompiledTransition& transition)
             {
-                return transitions
-                       | std::views::transform(
-                           [&](ConditionalTransitionContext<BbT>& transition)
-                           {
-                               return CompiledConditionalTransition {
-                                   .onConditionHit =
-                                       std::move(transition.condition),
-                                   .transition = compileTransition(
-                                       transition.destination, index),
-                               };
-                           })
-                       | std::ranges::to<std::vector>();
+                bb.__stateIdxs.insert(
+                    bb.__stateIdxs.end(), transition.begin(), transition.end());
             }
 
             template<BlackboardTypeConcept BbT>
-            CompiledState<BbT> compileState(
-                StateBuilderContext<BbT>& state, const StateIndex& index)
+            [[nodiscard]] size_t getEntryStateIdx(
+                const BuilderContext<BbT>& context, const StateIndex& index)
             {
-                return CompiledState<BbT> {
-                    .conditionalTransitions = compileAllConditionalTransitions(
-                        state.conditions, index),
-                    .executeBehavior = std::move(state.action),
-                    .defaultTransition =
-                        compileTransition(state.destination, index),
-                };
+                return index.getStateIndex(createFullStateName(
+                    "__main__", context.machines.at("__main__").entryState));
             }
-
-            template<BlackboardTypeConcept BbT>
-            std::vector<CompiledState<BbT>> compileMachine(
-                BuilderContext<BbT>& context, const StateIndex& index)
-            {
-                return index.getIndexedStateNames()
-                       | std::views::transform(
-                           [](const std::string& fullName) {
-                               return getMachineAndStateNameFromFullName(
-                                   fullName);
-                           })
-                       | std::views::transform(
-                           [&context, &index](
-                               const std::pair<MachineId, StateId>& namePair)
-                           {
-                               return compileState(
-                                   context.machines[namePair.first]
-                                       .states[namePair.second],
-                                   index);
-                           })
-                       | std::ranges::to<std::vector>();
-            }
-
         } // namespace detail
     }     // namespace fsm
 } // namespace dgm

@@ -1,18 +1,6 @@
 #include <DGM/classes/Error.hpp>
 #include <DGM/classes/Helper.hpp>
 
-dgm::fsm::detail::CompiledTransition dgm::fsm::detail::compileTransition(
-    const TransitionContext& destination, const StateIndex& index)
-{
-    if (destination.secondary.empty())
-        if (destination.primary.empty())
-            return {};
-        else
-            return { index.getStateIndex(destination.primary) };
-    return { index.getStateIndex(destination.primary),
-             index.getStateIndex(destination.secondary) };
-}
-
 std::string dgm::fsm::detail::createFullStateName(
     const MachineId& machineName, const StateId& stateName)
 {
@@ -29,4 +17,11 @@ dgm::fsm::detail::getMachineAndStateNameFromFullName(
 
     return { fullName.substr(0, separatorIdx),
              fullName.substr(separatorIdx + 1) };
+}
+
+size_t dgm::fsm::detail::popTopState(BlackboardBase& bb)
+{
+    auto idx = bb.__stateIdxs.back();
+    bb.__stateIdxs.pop_back();
+    return idx;
 }

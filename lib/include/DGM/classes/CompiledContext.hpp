@@ -32,7 +32,7 @@ namespace dgm
 
                 constexpr [[nodiscard]] auto end(this auto&& self) noexcept
                 {
-                    return std::end(self.data);
+                    return std::begin(self.data) + self.size;
                 }
 
                 constexpr [[nodiscard]] size_t getSize() const noexcept
