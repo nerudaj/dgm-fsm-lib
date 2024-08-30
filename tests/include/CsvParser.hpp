@@ -1,54 +1,36 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "Blackboard.hpp"
 
-struct Blackboard
+bool isEscapeChar(const Blackboard& bb)
 {
-    const std::string CSV;
-    std::vector<std::vector<std::string>> data = { {} };
-    unsigned pos = 0;
-    std::string currentWord = "";
-};
+    return bb.data[bb.charIdx] == '"';
+}
 
-class CsvParser
+bool isSeparatorChar(const Blackboard& bb)
 {
-public:
-    static bool isEof(const Blackboard& bb)
-    {
-        return bb.CSV.size() <= bb.pos;
-    }
+    return bb.data[bb.charIdx] == ',';
+}
 
-    static bool isComma(const Blackboard& bb)
-    {
-        return bb.CSV[bb.pos] == ',';
-    }
+bool isNewlineChar(const Blackboard& bb)
+{
+    return bb.data[bb.charIdx] == '\n';
+}
 
-    static bool isNewline(const Blackboard& bb)
-    {
-        return bb.CSV[bb.pos] == '\n';
-    }
+void advanceChar(Blackboard& bb)
+{
+    ++bb.charIdx;
+}
 
-    static bool isExclamationMark(const Blackboard& bb)
-    {
-        return bb.CSV[bb.pos] == '!';
-    }
+void storeWord(Blackboard& bb)
+{
+    bb.csv.back().push_back(
+        bb.data.substr(bb.wordStartIdx, bb.charIdx - bb.wordStartIdx));
+}
 
-    static void storeWord(Blackboard& bb)
-    {
-        bb.data.back().push_back(bb.currentWord);
-        bb.currentWord = "";
-        bb.pos++;
-    }
+void startLine(Blackboard& bb)
+{
+    bb.csv.push_back({});
+}
 
-    static void handleNewline(Blackboard& bb)
-    {
-        bb.data.push_back({});
-    }
-
-    static void advanceChar(Blackboard& bb)
-    {
-        bb.currentWord += bb.CSV[bb.pos];
-        bb.pos++;
-    }
-};
+void nothing(Blackboard&) {}

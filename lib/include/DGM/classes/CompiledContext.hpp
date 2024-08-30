@@ -10,8 +10,9 @@ namespace dgm
     {
         namespace detail
         {
-            struct [[nodiscard]] CompiledTransition final
+            class [[nodiscard]] CompiledTransition final
             {
+            public:
                 constexpr CompiledTransition(
                     std::initializer_list<size_t> items) noexcept
                 {
@@ -20,6 +21,10 @@ namespace dgm
                     size = items.size();
                 }
 
+                CompiledTransition(CompiledTransition&&) = default;
+                CompiledTransition(const CompiledTransition&&) = delete;
+
+            public:
                 constexpr [[nodiscard]] auto begin(this auto&& self) noexcept
                 {
                     return std::begin(self.data);

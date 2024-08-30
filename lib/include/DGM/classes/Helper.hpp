@@ -14,6 +14,9 @@ namespace dgm
             [[nodiscard]] std::string createFullStateName(
                 const MachineId& machineName, const StateId& stateName);
 
+            [[nodiscard]] std::pair<MachineId, StateId>
+            getMachineAndStateNameFromFullName(const std::string& fullName);
+
             template<BlackboardTypeConcept BbT>
             StateIndex createStateIndexFromBuilderContext(
                 const BuilderContext<BbT>& context)
@@ -45,7 +48,7 @@ namespace dgm
             {
                 return transitions
                        | std::views::transform(
-                           [&](ConditionalTransitionContext& transition)
+                           [&](ConditionalTransitionContext<BbT>& transition)
                            {
                                return CompiledConditionalTransition {
                                    .onConditionHit =
@@ -53,7 +56,8 @@ namespace dgm
                                    .transition = compileTransition(
                                        transition.destination, index),
                                };
-                           });
+                           })
+                       | std::ranges::to<std::vector>();
             }
 
             template<BlackboardTypeConcept BbT>
@@ -67,6 +71,28 @@ namespace dgm
                     .defaultTransition =
                         compileTransition(state.destination, index),
                 };
+            }
+
+            template<BlackboardTypeConcept BbT>
+            std::vector<CompiledState<BbT>> compileMachine(
+                BuilderContext<BbT>& context, const StateIndex& index)
+            {
+                return index.getIndexedStateNames()
+                       | std::views::transform(
+                           [](const std::string& fullName) {
+                               return getMachineAndStateNameFromFullName(
+                                   fullName);
+                           })
+                       | std::views::transform(
+                           [&context, &index](
+                               const std::pair<MachineId, StateId>& namePair)
+                           {
+                               return compileState(
+                                   context.machines[namePair.first]
+                                       .states[namePair.second],
+                                   index);
+                           })
+                       | std::ranges::to<std::vector>();
             }
 
         } // namespace detail

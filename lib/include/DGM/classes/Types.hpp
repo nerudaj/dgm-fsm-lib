@@ -10,15 +10,21 @@ namespace dgm
 {
     namespace fsm
     {
-        // TODO: move all to detail
+        struct [[nodiscard]] BlackboardBase
+        {
+            std::vector<size_t> __stateIdxs;
+        };
 
         template<class T>
-        concept BlackboardTypeConcept = true;
+        concept BlackboardTypeConcept = std::derived_from<T, BlackboardBase>;
 
-        template<BlackboardTypeConcept BbT>
-        using Action = std::function<void(BbT&)>;
+        namespace detail
+        {
+            template<BlackboardTypeConcept BbT>
+            using Action = std::function<void(BbT&)>;
 
-        template<BlackboardTypeConcept BbT>
-        using Condition = std::function<void(const BbT&)>;
-    } // namespace fsm
+            template<BlackboardTypeConcept BbT>
+            using Condition = std::function<void(const BbT&)>;
+        } // namespace detail
+    }     // namespace fsm
 } // namespace dgm

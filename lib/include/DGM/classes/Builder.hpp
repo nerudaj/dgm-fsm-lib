@@ -1,6 +1,9 @@
 #pragma once
 
 #include <DGM/classes/BuilderContext.hpp>
+#include <DGM/classes/Error.hpp>
+#include <DGM/classes/Fsm.hpp>
+#include <DGM/classes/Helper.hpp>
 #include <DGM/classes/Types.hpp>
 
 namespace dgm
@@ -9,6 +12,11 @@ namespace dgm
     {
         namespace detail
         {
+            constexpr const char* EMPTY_MACHINE_ERROR =
+                "Machine name cannot be empty";
+            constexpr const char* EMPTY_STATE_ERROR =
+                "State name cannot be empty";
+
             template<BlackboardTypeConcept BbT, bool IsSubmachine>
             class StateBuilder;
 
@@ -32,9 +40,9 @@ namespace dgm
                 FinalBuilder(const FinalBuilder&) = delete;
 
             public:
-                BuilderContext<BbT> build()
+                Fsm<BbT> build()
                 {
-                    return std::move(context);
+                    return Fsm(std::move(context));
                 }
 
             private:
@@ -59,6 +67,8 @@ namespace dgm
             public:
                 auto andGoToState(StateId name)
                 {
+                    if (name.empty()) throw Error(EMPTY_STATE_ERROR);
+
                     context.getCurrentlyBuiltState().destination.primary =
                         createFullStateName(
                             context.currentlyBuiltMachine, name);
@@ -70,6 +80,21 @@ namespace dgm
                 auto andGoToMachineThenReturnToState(
                     MachineId machineName, StateId stateName)
                 {
+                    if (machineName.empty()) throw Error(EMPTY_MACHINE_ERROR);
+
+                    if (stateName.empty()) throw Error(EMPTY_STATE_ERROR);
+
+                    if (machineName == context.currentlyBuiltMachine)
+                        throw Error(
+                            "When transition to machine, you cannot re-enter "
+                            "the current machine");
+
+                    if (!context.machines.contains(machineName))
+                        throw Error(
+                            "Trying to go to machine called {} that is not "
+                            "defined yet",
+                            machineName);
+
                     // TODO: exceptions
                     assert(machineName != context.currentlyBuiltMachine);
                     assert(context.machines.contains(machineName));
@@ -121,6 +146,8 @@ namespace dgm
             public:
                 auto goToState(StateId name)
                 {
+                    if (name.empty()) throw Error(EMPTY_STATE_ERROR);
+
                     context.getCurrentlyBuiltState().conditions.push_back(
                         ConditionalTransitionContext {
                             .condition = condition,
@@ -133,6 +160,21 @@ namespace dgm
                 auto goToMachineAndThenToState(
                     MachineId machineName, StateId stateName)
                 {
+                    if (machineName.empty()) throw Error(EMPTY_MACHINE_ERROR);
+
+                    if (stateName.empty()) throw Error(EMPTY_STATE_ERROR);
+
+                    if (machineName == context.currentlyBuiltMachine)
+                        throw Error(
+                            "When transition to machine, you cannot re-enter "
+                            "the current machine");
+
+                    if (!context.machines.contains(machineName))
+                        throw Error(std::format(
+                            "Trying to go to machine called {} that is not "
+                            "defined yet",
+                            machineName));
+
                     context.getCurrentlyBuiltState().conditions.push_back(
                         ConditionalTransitionContext {
                             .condition = std::move(condition),
@@ -247,6 +289,8 @@ namespace dgm
             public:
                 auto withEntryState(StateId name)
                 {
+                    if (name.empty()) throw Error(EMPTY_STATE_ERROR);
+
                     auto& machine = context.getCurrentlyBuiltMachine();
                     machine.entryState = name;
                     machine.currentlyBuiltState = name;
@@ -274,9 +318,16 @@ namespace dgm
             public:
                 auto withState(StateId name)
                 {
+                    if (name.empty()) throw Error(EMPTY_STATE_ERROR);
+
                     auto& machine = context.getCurrentlyBuiltMachine();
 
-                    assert(!machine.states.contains(name));
+                    if (machine.states.contains(name))
+                        throw Error(std::format(
+                            "Trying to redeclare state with name {} in machine "
+                            "{}",
+                            name,
+                            context.currentlyBuiltMachine));
 
                     machine.currentlyBuiltState = name;
                     machine.states[name] = {};
@@ -316,8 +367,11 @@ namespace dgm
                 template<bool IsSubmachine = true>
                 auto withSubmachine(MachineId name)
                 {
-                    assert(!context.machines.contains(name));
-                    assert(!name.empty());
+                    if (name.empty()) throw Error(EMPTY_MACHINE_ERROR);
+
+                    if (context.machines.contains(name))
+                        throw Error(std::format(
+                            "Trying to redeclare machine with name {}", name));
 
                     context.currentlyBuiltMachine = name;
                     context.machines[name] = {};
@@ -352,7 +406,8 @@ namespace dgm
             public:
                 auto goToState(StateId name)
                 {
-                    assert(!name.empty());
+                    if (name.empty()) throw Error(EMPTY_STATE_ERROR);
+
                     return MainBuilder<BbT>(BuilderContext<BbT> {
                         .errorCondition = std::move(condition),
                         .errorDestination =
@@ -380,10 +435,10 @@ namespace dgm
         public:
             auto withNoGlobalErrorCondition()
             {
-                return detail::MainBuilder<BbT>(BuilderContext<BbT> {});
+                return detail::MainBuilder<BbT>(detail::BuilderContext<BbT> {});
             }
 
-            /*auto withGlobalErrorCondition(Condition<BbT>&& condition)
+            /*auto withGlobalErrorCondition(detail::Condition<BbT>&& condition)
             {
                 return detail::GlobalErrorConditionBuilder(
                     std::move(condition));

@@ -26,32 +26,22 @@ namespace dgm
         private:
 
         public:
-            explicit Fsm(BuilderContext<BbT>&& context)
+            explicit Fsm(detail::BuilderContext<BbT>&& context)
             {
                 auto&& index =
                     detail::createStateIndexFromBuilderContext(context);
 
-                states.resize(index.getSize());
-
-                for (auto& [machineName, machineContext] : machines)
-                {
-                    for (auto& [stateName, stateContext] :
-                         machineContext.states)
-                    {
-                        auto idx =
-                            index.getStateIndex(detail::createFullStateName(
-                                machineName, stateName));
-                        states[idx] = detail::compileState(stateContext, index);
-                    }
-                }
+                states = detail::compileMachine(context, index);
+                stateIdToName = index.getIndexedStateNames();
             }
 
             Fsm(Fsm&&) = delete;
             Fsm(const Fsm&) = delete;
 
         public:
-            void tick(Blackboard& blackboard)
+            void tick(BbT& blackboard)
             {
+                /*
                 // TODO: pop stateid
 
                 unsigned stateId = 0;
@@ -69,6 +59,7 @@ namespace dgm
 
                 state.executeBehavior(blackboard);
                 // TODO: take default transition
+                */
             }
 
             // void tickUntilBehaviorExecuted(Blackboard& blackboard);
