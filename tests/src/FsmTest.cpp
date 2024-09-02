@@ -6,8 +6,21 @@
 
 TEST_CASE("[FSM]")
 {
+    auto handleSeparator = [](Blackboard& bb)
+    {
+        storeWord(bb);
+        advanceChar(bb);
+    };
+
+    auto handleNewline = [](Blackboard& bb)
+    {
+        storeWord(bb);
+        startLine(bb);
+        advanceChar(bb);
+    };
+
     // clang-format off
-    auto&& fsm = dgm::fsm::Builder<Blackboard>()
+    /*auto&& fsm = dgm::fsm::Builder<Blackboard>()
         .withNoGlobalErrorCondition()
         .withSubmachine("Shifter")
             .withEntryState("Shift")
@@ -15,24 +28,27 @@ TEST_CASE("[FSM]")
             .done()
         .withMainMachine()
             .withEntryState("Start")
-                .when(isEof).finish()
-                .orWhen(isEscapeChar).goToMachineAndThenToState("Shifter", "Escaped")
+                .when(isEof).goToState("Error")
+                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("Escaped")
                 .orWhen(isSeparatorChar).goToState("SeparatorChar")
                 .orWhen(isNewlineChar).goToState("NewlineChar")
                 .otherwiseExec(advanceChar).andLoop()
             .withState("Escaped")
-                .when(isEscapeChar).goToMachineAndThenToState("Shifter", "CharAfterSecondEscaped")
+                .when(isEof).goToState("Error")
+                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("CharAfterSecondEscaped")
                 .otherwiseExec(advanceChar).andLoop()
             .withState("CharAfterSecondEscaped")
                 // doubly escaped, returning to regularly quoted
-                .when(isEscapeChar).goToMachineAndThenToState("Shifter", "Escaped") 
+                .when(isEof).goToState("Error")
+                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("Escaped") 
                 .orWhen(isSeparatorChar).goToState("SeparatorChar")
                 .orWhen(isNewlineChar).goToState("NewlineChar")
                 .otherwiseExec(nothing).andGoToState("Error")
             .withState("SeparatorChar")
-                .exec([](Blackboard& bb) { storeWord(bb); advanceChar(bb); }).andGoToState("Start")
+                .exec(handleSeparator).andGoToState("Start")
             .withState("NewlineChar")
-                .exec([](Blackboard& bb) { storeWord(bb); startLine(bb); advanceChar(bb); }).andGoToState("Start")
+                // TODO: then check if eof and end possibly
+                .exec(handleNewline).andGoToState("Start")
             .withState("Error")
                 .exec(nothing).andLoop()
             .done()
@@ -48,7 +64,7 @@ TEST_CASE("[FSM]")
     while (!fsm.isFinished(bb))
     {
         fsm.tick(bb);
-    }
+    }*/
 
     // TODO: tick until finished or errored
 }

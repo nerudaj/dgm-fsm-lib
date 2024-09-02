@@ -90,14 +90,10 @@ namespace dgm
                             "the current machine");
 
                     if (!context.machines.contains(machineName))
-                        throw Error(
+                        throw Error(std::format(
                             "Trying to go to machine called {} that is not "
                             "defined yet",
-                            machineName);
-
-                    // TODO: exceptions
-                    assert(machineName != context.currentlyBuiltMachine);
-                    assert(context.machines.contains(machineName));
+                            machineName));
 
                     auto& state = context.getCurrentlyBuiltState();
                     state.destination.primary = createFullStateName(

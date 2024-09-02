@@ -15,9 +15,9 @@ target_include_directories ( ${TARGET}
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-target_link_libraries ( ${TARGET}
-	LINK_PRIVATE nlohmann_json::nlohmann_json
-)
+#target_link_libraries ( ${TARGET}
+#	LINK_PRIVATE nlohmann_json::nlohmann_json
+#)
 
 target_compile_features( ${TARGET}
 	INTERFACE ${CXX_COMPILE_FEATURES}
