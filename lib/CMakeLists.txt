@@ -1,4 +1,4 @@
-cmake_minimum_required ( VERSION 3.19 )
+cmake_minimum_required ( VERSION 3.26 )
 
 set ( TARGET libfsm )
 
@@ -13,18 +13,6 @@ add_library ( ${TARGET} STATIC
 
 target_include_directories ( ${TARGET}
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
-
-#target_link_libraries ( ${TARGET}
-#	LINK_PRIVATE nlohmann_json::nlohmann_json
-#)
-
-target_compile_features( ${TARGET}
-	INTERFACE ${CXX_COMPILE_FEATURES}
-)
-
-target_compile_options ( ${TARGET}
-	PRIVATE ${CXX_COMPILE_OPTIONS}
 )
 
 # Packaging rules
