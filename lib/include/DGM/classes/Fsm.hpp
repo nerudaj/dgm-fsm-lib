@@ -63,6 +63,12 @@ namespace dgm
                 {
                     if (condition.onConditionHit(blackboard))
                     {
+                        std::println(
+                            "{},Condition {} hit,->{}",
+                            stateIdToName[currentStateIdx],
+                            condition.onConditionHit.target_type().name(),
+                            getTransitionLog(condition.transition));
+
                         detail::executeTransition(
                             blackboard, condition.transition);
                         return;
@@ -70,6 +76,11 @@ namespace dgm
                 }
 
                 state.executeBehavior(blackboard);
+                std::println(
+                    "{},Behavior {} executed,->{}",
+                    stateIdToName[currentStateIdx],
+                    state.executeBehavior.target_type().name(),
+                    getTransitionLog(state.defaultTransition));
                 detail::executeTransition(blackboard, state.defaultTransition);
             }
 
@@ -80,6 +91,18 @@ namespace dgm
             }
 
             // void tickUntilBehaviorExecuted(Blackboard& blackboard);
+
+        private:
+            std::string
+            getTransitionLog(const detail::CompiledTransition& transition)
+            {
+                if (transition.isEmpty())
+                    return "Finishing";
+                else if (transition.getSize() == 1u)
+                    return stateIdToName[transition[0]];
+                return stateIdToName[transition[0]] + "/"
+                       + stateIdToName[transition[1]];
+            }
 
         private:
             std::vector<std::string> stateIdToName;

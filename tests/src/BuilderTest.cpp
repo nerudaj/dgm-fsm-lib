@@ -9,10 +9,11 @@ TEST_CASE("[Builder]")
     {
         // clang-format off
         REQUIRE_THROWS(dgm::fsm::Builder<Blackboard>()
-            .withNoGlobalErrorCondition()
+            .withNoErrorMachine()
             .withSubmachine("A")
                 .withEntryState("S")
-                    .exec(nothing).andGoToMachineThenReturnToState("__main__", "S")
+                    .exec(nothing)
+                        .andGoToMachine("__main__").thenGoToState("S")
                 .done()
             .withMainMachine()
                 .withEntryState("S")
@@ -21,4 +22,13 @@ TEST_CASE("[Builder]")
             .build());
         // clang-format on
     }
+
+    /*
+    .withErrorMachine() / withNoErrorMachine()
+        .useGlobalEntryCondition()/.noGlobalEntryCondition()
+        .withEntryState()
+            .when().goToState() / restart()
+            .orWhen()
+            .otherwiseExec().andLoop() / andGoToState() / andRestart()
+    */
 }

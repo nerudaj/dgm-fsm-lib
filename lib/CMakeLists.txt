@@ -15,6 +15,8 @@ target_include_directories ( ${TARGET}
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
+apply_compile_options ( ${TARGET} )
+
 # Packaging rules
 set ( DEBUG_BINARY_DIR   "${CMAKE_CURRENT_BINARY_DIR}/Debug" )
 set ( RELEASE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/Release" )

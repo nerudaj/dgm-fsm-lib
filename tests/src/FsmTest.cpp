@@ -20,8 +20,8 @@ TEST_CASE("[FSM]")
     };
 
     // clang-format off
-    /*auto&& fsm = dgm::fsm::Builder<Blackboard>()
-        .withNoGlobalErrorCondition()
+    auto&& fsm = dgm::fsm::Builder<Blackboard>()
+        .withNoErrorMachine()
         .withSubmachine("Shifter")
             .withEntryState("Shift")
                 .exec(advanceChar).andFinish()
@@ -29,7 +29,8 @@ TEST_CASE("[FSM]")
         .withMainMachine()
             .withEntryState("Start")
                 .when(isEof).goToState("Error")
-                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("Escaped")
+                .orWhen(isEscapeChar)
+                    .goToMachine("Shifter").thenGoToState("Escaped")
                 .orWhen(isSeparatorChar).goToState("SeparatorChar")
                 .orWhen(isNewlineChar).goToState("NewlineChar")
                 .otherwiseExec(advanceChar).andLoop()
@@ -47,8 +48,10 @@ TEST_CASE("[FSM]")
             .withState("SeparatorChar")
                 .exec(handleSeparator).andGoToState("Start")
             .withState("NewlineChar")
-                // TODO: then check if eof and end possibly
-                .exec(handleNewline).andGoToState("Start")
+                .exec(handleNewline).andGoToState("CheckEof")
+            .withState("CheckEof")
+                .when(isEof).finish()
+                .otherwiseExec(nothing).andGoToState("Start")
             .withState("Error")
                 .exec(nothing).andLoop()
             .done()
@@ -56,7 +59,7 @@ TEST_CASE("[FSM]")
     // clang-format on
 
     auto&& bb = Blackboard {
-        .data = "abc,cde,efg\nabc,cde,efg\n",
+        .data = "abc,cde,efg\n\"abc\",\"cd\"\"e\",efg\n",
     };
 
     fsm.start(bb);
@@ -64,7 +67,7 @@ TEST_CASE("[FSM]")
     while (!fsm.isFinished(bb))
     {
         fsm.tick(bb);
-    }*/
+    }
 
     // TODO: tick until finished or errored
 }

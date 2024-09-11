@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DGM/classes/Types.hpp>
+#include <format>
 #include <map>
 #include <string>
 #include <vector>
@@ -51,17 +52,6 @@ namespace dgm
                 Condition<BbT> errorCondition;
                 TransitionContext errorDestination;
                 bool useGlobalError = false;
-
-                MachineBuilderContext<BbT>& getCurrentlyBuiltMachine()
-                {
-                    return machines.at(currentlyBuiltMachine);
-                }
-
-                StateBuilderContext<BbT>& getCurrentlyBuiltState()
-                {
-                    auto& machine = getCurrentlyBuiltMachine();
-                    return machine.states.at(machine.currentlyBuiltState);
-                }
             };
         } // namespace detail
     }     // namespace fsm

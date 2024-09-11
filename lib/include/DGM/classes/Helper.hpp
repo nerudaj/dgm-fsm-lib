@@ -42,8 +42,11 @@ namespace dgm
             constexpr static void executeTransition(
                 BlackboardBase& bb, const CompiledTransition& transition)
             {
+                auto reverseTransition = std::ranges::reverse_view(transition);
                 bb.__stateIdxs.insert(
-                    bb.__stateIdxs.end(), transition.begin(), transition.end());
+                    bb.__stateIdxs.end(),
+                    reverseTransition.begin(),
+                    reverseTransition.end());
             }
 
             template<BlackboardTypeConcept BbT>

@@ -9,6 +9,8 @@ dgm::fsm::detail::Compiler::compileTransition(
             return {};
         else
             return { index.getStateIndex(destination.primary) };
-    return { index.getStateIndex(destination.primary),
-             index.getStateIndex(destination.secondary) };
+    return {
+        index.getStateIndex(destination.primary),
+        index.getStateIndex(destination.secondary),
+    };
 }

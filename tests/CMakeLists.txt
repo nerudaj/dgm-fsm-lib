@@ -20,6 +20,8 @@ target_link_libraries ( ${TARGET}
 	libfsm Catch2::Catch2WithMain
 )
 
+apply_compile_options ( ${TARGET} )
+
 add_test (
 	NAME ${PROJECT_NAME}
 	COMMAND ${PROJECT_NAME}
