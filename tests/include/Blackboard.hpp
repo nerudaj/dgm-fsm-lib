@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-struct Blackboard : dgm::fsm::BlackboardBase
+struct Blackboard : fsm::BlackboardBase
 {
     std::string data = "";
     size_t charIdx = 0;

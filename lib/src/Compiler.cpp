@@ -1,7 +1,6 @@
 #include <DGM/classes/Compiler.hpp>
 
-dgm::fsm::detail::CompiledTransition
-dgm::fsm::detail::Compiler::compileTransition(
+fsm::detail::CompiledTransition fsm::detail::Compiler::compileTransition(
     const TransitionContext& destination, const StateIndex& index)
 {
     if (destination.secondary.empty())

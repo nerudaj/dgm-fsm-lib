@@ -1,15 +1,14 @@
 #include <DGM/classes/Error.hpp>
 #include <DGM/classes/Helper.hpp>
 
-std::string dgm::fsm::detail::createFullStateName(
+std::string fsm::detail::createFullStateName(
     const MachineId& machineName, const StateId& stateName)
 {
     return machineName + ":" + stateName;
 }
 
-std::pair<dgm::fsm::detail::MachineId, dgm::fsm::detail::StateId>
-dgm::fsm::detail::getMachineAndStateNameFromFullName(
-    const std::string& fullName)
+std::pair<fsm::detail::MachineId, fsm::detail::StateId>
+fsm::detail::getMachineAndStateNameFromFullName(const std::string& fullName)
 {
     auto separatorIdx = fullName.find(':');
     if (separatorIdx == std::string::npos)
@@ -19,7 +18,7 @@ dgm::fsm::detail::getMachineAndStateNameFromFullName(
              fullName.substr(separatorIdx + 1) };
 }
 
-size_t dgm::fsm::detail::popTopState(BlackboardBase& bb)
+size_t fsm::detail::popTopState(BlackboardBase& bb)
 {
     auto idx = bb.__stateIdxs.back();
     bb.__stateIdxs.pop_back();

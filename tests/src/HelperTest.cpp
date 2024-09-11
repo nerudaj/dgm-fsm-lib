@@ -4,7 +4,7 @@
 
 TEST_CASE("[Helper]")
 {
-    using namespace dgm::fsm::detail;
+    using namespace fsm::detail;
 
     SECTION("createStateIndexFromBuilderContext")
     {

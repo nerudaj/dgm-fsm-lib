@@ -8,7 +8,7 @@ TEST_CASE("[Builder]")
     SECTION("Cannot call __main__ machine from submachine")
     {
         // clang-format off
-        REQUIRE_THROWS(dgm::fsm::Builder<Blackboard>()
+        REQUIRE_THROWS(fsm::Builder<Blackboard>()
             .withNoErrorMachine()
             .withSubmachine("A")
                 .withEntryState("S")

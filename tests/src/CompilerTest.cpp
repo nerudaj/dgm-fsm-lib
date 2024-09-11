@@ -3,7 +3,7 @@
 
 TEST_CASE("[Compiler]")
 {
-    using namespace dgm::fsm::detail;
+    using namespace fsm::detail;
 
     SECTION("compileDestination")
     {

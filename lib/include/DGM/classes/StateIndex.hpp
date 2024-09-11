@@ -5,36 +5,30 @@
 #include <format>
 #include <unordered_map>
 
-namespace dgm
+namespace fsm::detail
 {
-    namespace fsm
+    class [[nodiscard]] StateIndex final
     {
-        namespace detail
+    public:
+        StateIndex() = default;
+        StateIndex(StateIndex&&) = default;
+        StateIndex(const StateIndex&) = delete;
+
+    public:
+        void addNameToIndex(const StateId& name);
+
+        unsigned getStateIndex(const StateId& name) const;
+
+        [[nodiscard]] inline size_t getSize() const noexcept
         {
-            class [[nodiscard]] StateIndex final
-            {
-            public:
-                StateIndex() = default;
-                StateIndex(StateIndex&&) = default;
-                StateIndex(const StateIndex&) = delete;
+            return nameToId.size();
+        }
 
-            public:
-                void addNameToIndex(const StateId& name);
+        std::vector<std::string> getIndexedStateNames() const;
 
-                unsigned getStateIndex(const StateId& name) const;
+    private:
+        unsigned cnt = 0;
+        std::unordered_map<StateId, unsigned> nameToId;
+    };
 
-                [[nodiscard]] inline size_t getSize() const noexcept
-                {
-                    return nameToId.size();
-                }
-
-                std::vector<std::string> getIndexedStateNames() const;
-
-            private:
-                unsigned cnt = 0;
-                std::unordered_map<StateId, unsigned> nameToId;
-            };
-
-        } // namespace detail
-    }     // namespace fsm
-} // namespace dgm
+} // namespace fsm::detail

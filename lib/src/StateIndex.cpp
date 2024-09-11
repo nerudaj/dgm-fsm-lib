@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <ranges>
 
-void dgm::fsm::detail::StateIndex::addNameToIndex(const StateId& name)
+void fsm::detail::StateIndex::addNameToIndex(const StateId& name)
 {
     if (nameToId.contains(name))
     {
@@ -15,7 +15,7 @@ void dgm::fsm::detail::StateIndex::addNameToIndex(const StateId& name)
     nameToId[name] = cnt++;
 }
 
-unsigned dgm::fsm::detail::StateIndex::getStateIndex(const StateId& name) const
+unsigned fsm::detail::StateIndex::getStateIndex(const StateId& name) const
 
 {
     if (!nameToId.contains(name))
@@ -26,8 +26,7 @@ unsigned dgm::fsm::detail::StateIndex::getStateIndex(const StateId& name) const
     return nameToId.at(name);
 }
 
-std::vector<std::string>
-dgm::fsm::detail::StateIndex::getIndexedStateNames() const
+std::vector<std::string> fsm::detail::StateIndex::getIndexedStateNames() const
 {
 
     auto&& indexedStateNames =

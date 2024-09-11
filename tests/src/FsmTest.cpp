@@ -20,7 +20,7 @@ TEST_CASE("[FSM]")
     };
 
     // clang-format off
-    auto&& fsm = dgm::fsm::Builder<Blackboard>()
+    auto&& fsm = fsm::Builder<Blackboard>()
         .withNoErrorMachine()
         .withSubmachine("Shifter")
             .withEntryState("Shift")

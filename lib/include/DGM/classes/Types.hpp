@@ -6,25 +6,22 @@
 #include <utility>
 #include <vector>
 
-namespace dgm
+namespace fsm
 {
-    namespace fsm
+    struct [[nodiscard]] BlackboardBase
     {
-        struct [[nodiscard]] BlackboardBase
-        {
-            std::vector<size_t> __stateIdxs;
-        };
+        std::vector<size_t> __stateIdxs;
+    };
 
-        template<class T>
-        concept BlackboardTypeConcept = std::derived_from<T, BlackboardBase>;
+    template<class T>
+    concept BlackboardTypeConcept = std::derived_from<T, BlackboardBase>;
 
-        namespace detail
-        {
-            template<BlackboardTypeConcept BbT>
-            using Action = std::function<void(BbT&)>;
+    namespace detail
+    {
+        template<BlackboardTypeConcept BbT>
+        using Action = std::function<void(BbT&)>;
 
-            template<BlackboardTypeConcept BbT>
-            using Condition = std::function<bool(const BbT&)>;
-        } // namespace detail
-    }     // namespace fsm
-} // namespace dgm
+        template<BlackboardTypeConcept BbT>
+        using Condition = std::function<bool(const BbT&)>;
+    } // namespace detail
+} // namespace fsm

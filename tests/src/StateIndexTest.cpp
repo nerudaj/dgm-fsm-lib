@@ -3,7 +3,7 @@
 
 TEST_CASE("[StateIndex]")
 {
-    auto&& index = dgm::fsm::detail::StateIndex();
+    auto&& index = fsm::detail::StateIndex();
     SECTION("Throws exception when trying to read id not inserted to index")
     {
         REQUIRE_THROWS(index.getStateIndex("not-inserted"));
