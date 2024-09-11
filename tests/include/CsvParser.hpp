@@ -40,3 +40,8 @@ static constexpr void startLine(Blackboard& bb)
 }
 
 static constexpr void nothing(Blackboard&) noexcept {}
+
+static constexpr bool alwaysTrue(const Blackboard&) noexcept
+{
+    return true;
+}

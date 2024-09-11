@@ -9,9 +9,6 @@
 
 namespace fsm::detail
 {
-    constexpr const char* EMPTY_MACHINE_ERROR = "Machine name cannot be empty";
-    constexpr const char* EMPTY_STATE_ERROR = "State name cannot be empty";
-
     template<BlackboardTypeConcept BbT, bool IsSubmachine, bool IsErrorMachine>
     class StateBuilder;
 
