@@ -77,8 +77,6 @@ namespace fsm::detail
     public:
         auto thenGoToState(StateId stateName)
         {
-            if (stateName.empty()) throw Error(EMPTY_STATE_ERROR);
-
             auto&& destination = TransitionContext {
                 .primary = createFullStateName(
                     targetMachineName,
@@ -128,18 +126,12 @@ namespace fsm::detail
     public:
         auto andGoToState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
-            getCurrentlyBuiltState(context).destination.primary =
-                createFullStateName(context.currentlyBuiltMachine, name);
-            return MachineBuilder<BbT, IsSubmachine>(std::move(context));
+            return andGoToStateInternal(name);
         }
 
         auto andGoToMachine(MachineId machineName)
         {
-            if (machineName.empty()) throw Error(EMPTY_MACHINE_ERROR);
-
-            if (machineName == context.currentlyBuiltMachine)
+            if (machineName.get() == context.currentlyBuiltMachine)
                 throw Error(
                     "When transition to machine, you cannot re-enter "
                     "the current machine");
@@ -148,7 +140,7 @@ namespace fsm::detail
                 throw Error(std::format(
                     "Trying to go to machine called {} that is not "
                     "defined yet",
-                    machineName));
+                    machineName.get()));
 
             return MachineBackTransitionBuilder<BbT, IsSubmachine>(
                 std::move(context), machineName);
@@ -156,12 +148,20 @@ namespace fsm::detail
 
         auto andLoop()
         {
-            return andGoToState(
+            return andGoToStateInternal(
                 getCurrentlyBuiltMachine(context).currentlyBuiltState);
         }
 
         auto andFinish()
         {
+            return MachineBuilder<BbT, IsSubmachine>(std::move(context));
+        }
+
+    private:
+        auto andGoToStateInternal(const std::string& stateName)
+        {
+            getCurrentlyBuiltState(context).destination.primary =
+                createFullStateName(context.currentlyBuiltMachine, stateName);
             return MachineBuilder<BbT, IsSubmachine>(std::move(context));
         }
 
@@ -187,8 +187,6 @@ namespace fsm::detail
     public:
         auto andGoToState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
             context.getCurrentlyBuiltState().destination.primary =
                 createFullStateName(context.currentlyBuiltMachine, name);
             return MachineBuilder<BbT, false, true>(std::move(context));
@@ -226,8 +224,6 @@ namespace fsm::detail
     public:
         auto goToState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
             addConditionalTransitionToStateInCurrentMachine(
                 std::move(condition), name, context);
             return StateBuilder<BbT, IsSubmachine>(std::move(context));
@@ -235,9 +231,7 @@ namespace fsm::detail
 
         auto goToMachine(MachineId machineName)
         {
-            if (machineName.empty()) throw Error(EMPTY_MACHINE_ERROR);
-
-            if (machineName == context.currentlyBuiltMachine)
+            if (machineName.get() == context.currentlyBuiltMachine)
                 throw Error(
                     "When transition to machine, you cannot re-enter "
                     "the current machine");
@@ -246,7 +240,7 @@ namespace fsm::detail
                 throw Error(std::format(
                     "Trying to go to machine called {} that is not "
                     "defined yet",
-                    machineName));
+                    machineName.get()));
 
             return MachineBackTransitionBuilder<BbT, IsSubmachine, false>(
                 std::move(context), machineName, std::move(condition));
@@ -287,8 +281,6 @@ namespace fsm::detail
     public:
         auto goToState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
             addConditionalTransitionToStateInCurrentMachine(
                 std::move(condition), name, context);
             return StateBuilder<BbT, false, true>(std::move(context));
@@ -436,8 +428,6 @@ namespace fsm::detail
     public:
         auto withState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
             insertNewStateIntoContext(name, context);
 
             return StateBuilderBeforePickingAnything<BbT, IsSubmachine>(
@@ -481,8 +471,6 @@ namespace fsm::detail
     public:
         auto withEntryState(StateId name)
         {
-            if (name.empty()) throw Error(EMPTY_STATE_ERROR);
-
             getCurrentlyBuiltMachine(context).entryState = name;
             insertNewStateIntoContext(name, context);
 
@@ -518,11 +506,9 @@ namespace fsm::detail
         template<bool IsSubmachine = true>
         auto withSubmachine(MachineId name)
         {
-            if (name.empty()) throw Error(EMPTY_MACHINE_ERROR);
-
             if (context.machines.contains(name))
                 throw Error(std::format(
-                    "Trying to redeclare machine with name {}", name));
+                    "Trying to redeclare machine with name {}", name.get()));
 
             insertNewMachineIntoContext(name, context);
             return MachineBuilderPreEntryPoint<BbT, IsSubmachine>(

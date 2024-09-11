@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <ranges>
 
-void fsm::detail::StateIndex::addNameToIndex(const StateId& name)
+void fsm::detail::StateIndex::addNameToIndex(const std::string& name)
 {
     if (nameToId.contains(name))
     {
@@ -15,7 +15,7 @@ void fsm::detail::StateIndex::addNameToIndex(const StateId& name)
     nameToId[name] = cnt++;
 }
 
-unsigned fsm::detail::StateIndex::getStateIndex(const StateId& name) const
+unsigned fsm::detail::StateIndex::getStateIndex(const std::string& name) const
 
 {
     if (!nameToId.contains(name))

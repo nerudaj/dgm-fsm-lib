@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace fsm::detail
 {
 
@@ -21,7 +23,17 @@ namespace fsm::detail
                 you_see_this_error_because_you_used_empty_string_in_fsm_builder();
         }
 
-        [[nodiscard]] constexpr StringT get() const noexcept
+        [[nodiscard]] constexpr std::string get() const noexcept
+        {
+            return std::string(data);
+        }
+
+        [[nodiscard]] constexpr operator std::string() const noexcept
+        {
+            return std::string(data);
+        }
+
+        [[nodiscard]] constexpr operator StringT() const noexcept
         {
             return data;
         }

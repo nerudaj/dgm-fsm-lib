@@ -57,8 +57,8 @@ namespace fsm::detail
                        [](const std::string& fullName)
                        { return getMachineAndStateNameFromFullName(fullName); })
                    | std::views::transform(
-                       [&context,
-                        &index](const std::pair<MachineId, StateId>& namePair)
+                       [&context, &index](
+                           const std::pair<std::string, std::string>& namePair)
                        {
                            return compileState(
                                context.machines[namePair.first]

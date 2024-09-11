@@ -7,10 +7,10 @@
 
 namespace fsm::detail
 {
-    [[nodiscard]] std::string
-    createFullStateName(const MachineId& machineName, const StateId& stateName);
+    [[nodiscard]] std::string createFullStateName(
+        const std::string& machineName, const std::string& stateName);
 
-    [[nodiscard]] std::pair<MachineId, StateId>
+    [[nodiscard]] std::pair<std::string, std::string>
     getMachineAndStateNameFromFullName(const std::string& fullName);
 
     template<BlackboardTypeConcept BbT>

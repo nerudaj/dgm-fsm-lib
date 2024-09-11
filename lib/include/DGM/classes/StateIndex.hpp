@@ -15,9 +15,9 @@ namespace fsm::detail
         StateIndex(const StateIndex&) = delete;
 
     public:
-        void addNameToIndex(const StateId& name);
+        void addNameToIndex(const std::string& name);
 
-        unsigned getStateIndex(const StateId& name) const;
+        unsigned getStateIndex(const std::string& name) const;
 
         [[nodiscard]] inline size_t getSize() const noexcept
         {
@@ -28,7 +28,7 @@ namespace fsm::detail
 
     private:
         unsigned cnt = 0;
-        std::unordered_map<StateId, unsigned> nameToId;
+        std::unordered_map<std::string, unsigned> nameToId;
     };
 
 } // namespace fsm::detail

@@ -38,7 +38,7 @@ namespace fsm::detail
             throw Error(std::format(
                 "Trying to redeclare state with name {} in machine "
                 "{}",
-                name,
+                name.get(),
                 context.currentlyBuiltMachine));
 
         machine.currentlyBuiltState = name;

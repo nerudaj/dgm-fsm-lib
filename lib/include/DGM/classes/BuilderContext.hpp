@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DGM/classes/NonEmptyString.hpp>
 #include <DGM/classes/Types.hpp>
 #include <format>
 #include <map>
@@ -8,13 +9,13 @@
 
 namespace fsm::detail
 {
-    using StateId = std::string;
-    using MachineId = std::string;
+    using StateId = NonEmptyString<char>;
+    using MachineId = NonEmptyString<char>;
 
     struct TransitionContext
     {
-        StateId primary = "";
-        StateId secondary = "";
+        std::string primary = "";
+        std::string secondary = "";
     };
 
     template<BlackboardTypeConcept BbT>
@@ -35,16 +36,16 @@ namespace fsm::detail
     template<BlackboardTypeConcept BbT>
     struct MachineBuilderContext
     {
-        StateId entryState;
-        StateId currentlyBuiltState;
-        std::map<StateId, StateBuilderContext<BbT>> states;
+        std::string entryState;
+        std::string currentlyBuiltState;
+        std::map<std::string, StateBuilderContext<BbT>> states;
     };
 
     template<BlackboardTypeConcept BbT>
     struct BuilderContext
     {
-        MachineId currentlyBuiltMachine;
-        std::map<MachineId, MachineBuilderContext<BbT>> machines;
+        std::string currentlyBuiltMachine;
+        std::map<std::string, MachineBuilderContext<BbT>> machines;
         Condition<BbT> errorCondition;
         TransitionContext errorDestination;
         bool useGlobalError = false;

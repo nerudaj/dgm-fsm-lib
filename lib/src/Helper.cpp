@@ -2,12 +2,12 @@
 #include <DGM/classes/Helper.hpp>
 
 std::string fsm::detail::createFullStateName(
-    const MachineId& machineName, const StateId& stateName)
+    const std::string& machineName, const std::string& stateName)
 {
-    return machineName + ":" + stateName;
+    return std::format("{}:{}", machineName, stateName);
 }
 
-std::pair<fsm::detail::MachineId, fsm::detail::StateId>
+std::pair<std::string, std::string>
 fsm::detail::getMachineAndStateNameFromFullName(const std::string& fullName)
 {
     auto separatorIdx = fullName.find(':');
