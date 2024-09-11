@@ -34,7 +34,38 @@ namespace fsm::detail
     public:
         Fsm<BbT> build()
         {
+            for (auto&& [_, machineContext] : context.machines)
+            {
+                for (auto&& [__, state] : machineContext.states)
+                {
+                    for (auto&& condition : state.conditions)
+                    {
+                        if (isRestartTransition(condition.destination))
+                            setPrimaryTransitionDestinationToMainEntryPoint(
+                                condition.destination);
+                    }
+
+                    if (isRestartTransition(state.destination))
+                        setPrimaryTransitionDestinationToMainEntryPoint(
+                            state.destination);
+                }
+            }
+
             return Fsm(std::move(context));
+        }
+
+    private:
+        void setPrimaryTransitionDestinationToMainEntryPoint(
+            TransitionContext& destination)
+        {
+            destination.primary = createFullStateName(
+                "__main__", context.machines.at("__main__").entryState);
+        }
+
+        [[nodiscard]] constexpr bool
+        isRestartTransition(const TransitionContext& transition) const noexcept
+        {
+            return transition.primary == "__error__:__restart__";
         }
 
     private:
@@ -184,7 +215,7 @@ namespace fsm::detail
     public:
         auto andGoToState(StateId name)
         {
-            context.getCurrentlyBuiltState().destination.primary =
+            getCurrentlyBuiltState(context).destination.primary =
                 createFullStateName(context.currentlyBuiltMachine, name);
             return MachineBuilder<BbT, false, true>(std::move(context));
         }
@@ -252,7 +283,18 @@ namespace fsm::detail
             return StateBuilder<BbT, IsSubmachine>(std::move(context));
         }
 
-        auto error() {}
+        auto error()
+        {
+            if (!context.machines.contains("__error__"))
+            {
+                throw new Error(
+                    "You cannot call error() when no error machine was "
+                    "defined");
+            }
+
+            addConditionalErrorTransition(std::move(condition), context);
+            return StateBuilder<BbT, IsSubmachine>(std::move(context));
+        }
 
     private:
         BuilderContext<BbT> context;
@@ -538,7 +580,7 @@ namespace fsm::detail
     public:
         auto noGlobalEntryCondition()
         {
-            return ErrorMachineMainBuilder<BbT, false, true>(
+            return MachineBuilderPreEntryPoint<BbT, false, true>(
                 std::move(context));
         }
 

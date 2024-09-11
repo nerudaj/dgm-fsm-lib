@@ -58,4 +58,20 @@ namespace fsm::detail
                     .primary = createFullStateName(
                         context.currentlyBuiltMachine, stateName) } });
     }
+
+    template<BlackboardTypeConcept BbT>
+    static inline void addConditionalErrorTransition(
+        Condition<BbT>&& condition, BuilderContext<BbT>& context)
+    {
+        getCurrentlyBuiltState(context).conditions.push_back(
+            ConditionalTransitionContext {
+                .condition = std::move(condition),
+                .destination =
+                    TransitionContext {
+                        .primary = createFullStateName(
+                            "__error__",
+                            context.machines.at("__error__").entryState),
+                    },
+            });
+    }
 } // namespace fsm::detail

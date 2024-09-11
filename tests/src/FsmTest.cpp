@@ -71,3 +71,24 @@ TEST_CASE("[FSM]")
 
     // TODO: tick until finished or errored
 }
+
+TEST_CASE("[FSM2]")
+{
+    SECTION("Can restart machine from error state")
+    {
+        // clang-format off
+        auto&& machine = fsm::Builder<Blackboard>()
+            .withErrorMachine()
+                .noGlobalEntryCondition()
+                .withEntryState("Start")
+                    .exec(nothing).andRestart()
+                .done()
+            .withMainMachine()
+                .withEntryState("Start")
+                    .when(alwaysTrue).error()
+                    .otherwiseExec(nothing).andLoop()
+                .done()
+            .build();
+        // clang-format on
+    }
+}
