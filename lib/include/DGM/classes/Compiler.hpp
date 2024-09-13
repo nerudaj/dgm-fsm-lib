@@ -16,6 +16,37 @@ namespace fsm::detail
             const TransitionContext& destination, const StateIndex& index);
 
         template<BlackboardTypeConcept BbT>
+        static [[nodiscard]] CompiledConditionalTransition<BbT>
+        compileConditionalTransition(
+            Condition<BbT>&& condition,
+            const TransitionContext& destination,
+            const StateIndex& index)
+        {
+            return CompiledConditionalTransition {
+                .onConditionHit = std::move(condition),
+                .transition = compileTransition(destination, index),
+            };
+        }
+
+        template<BlackboardTypeConcept BbT>
+        static [[nodiscard]] CompiledConditionalTransition<BbT>
+        compileGlobalErrorTransition(
+            BuilderContext<BbT>& context, const StateIndex& index)
+        {
+            if (context.useGlobalError)
+            {
+                return compileConditionalTransition(
+                    std::move(context.errorCondition),
+                    context.errorDestination,
+                    index);
+            }
+
+            return CompiledConditionalTransition<BbT> {
+                .onConditionHit = [](const BbT&) { return false; },
+            };
+        }
+
+        template<BlackboardTypeConcept BbT>
         static [[nodiscard]] std::vector<CompiledConditionalTransition<BbT>>
         compileAllConditionalTransitions(
             std::vector<ConditionalTransitionContext<BbT>>& transitions,
@@ -23,14 +54,12 @@ namespace fsm::detail
         {
             return transitions
                    | std::views::transform(
-                       [&](ConditionalTransitionContext<BbT>& transition)
+                       [&index](ConditionalTransitionContext<BbT>& transition)
                        {
-                           return CompiledConditionalTransition {
-                               .onConditionHit =
-                                   std::move(transition.condition),
-                               .transition = compileTransition(
-                                   transition.destination, index),
-                           };
+                           return compileConditionalTransition(
+                               std::move(transition.condition),
+                               transition.destination,
+                               index);
                        })
                    | std::ranges::to<std::vector>();
         }

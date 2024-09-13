@@ -25,14 +25,17 @@ namespace fsm
     private:
 
     public:
-        explicit Fsm(detail::BuilderContext<BbT>&& context)
+        explicit Fsm(
+            const detail::StateIndex& index,
+            detail::BuilderContext<BbT>&& context)
+            : stateIdToName(index.getIndexedStateNames())
+            , states(detail::Compiler::compileMachine(context, index))
+            , entryStateIdx(detail::getEntryStateIdx(context, index))
+            , errorStateCount(detail::getErrorStatesCount(context))
+            , globalErrorTransition(
+                  detail::Compiler::compileGlobalErrorTransition<BbT>(
+                      context, index))
         {
-            auto&& index = detail::createStateIndexFromBuilderContext(context);
-
-            entryStateIdx = detail::getEntryStateIdx(context, index);
-            errorStateCount = detail::getErrorStatesCount(context);
-            states = detail::Compiler::compileMachine(context, index);
-            stateIdToName = index.getIndexedStateNames();
         }
 
         Fsm(Fsm&&) = delete;
@@ -54,6 +57,14 @@ namespace fsm
 
             auto currentStateIdx = detail::popTopState(blackboard);
 
+            if (globalErrorTransition.onConditionHit(blackboard))
+            {
+                blackboard.__stateIdxs.clear();
+                detail::executeTransition(
+                    blackboard, globalErrorTransition.transition);
+                return;
+            }
+
             assert(currentStateIdx < states.size());
             auto& state = states[currentStateIdx];
 
@@ -66,6 +77,11 @@ namespace fsm
                         stateIdToName[currentStateIdx],
                         condition.onConditionHit.target_type().name(),
                         getTransitionLog(condition.transition));
+
+                    if (isErrorTransition(condition.transition))
+                    {
+                        blackboard.__stateIdxs.clear();
+                    }
 
                     detail::executeTransition(blackboard, condition.transition);
                     return;
@@ -91,7 +107,7 @@ namespace fsm
         isErrored(const Blackboard& blackboard) const noexcept
         {
             return !blackboard.__stateIdxs.empty()
-                   && blackboard.__stateIdxs.back() < errorStateCount;
+                   && isErrorStateIdx(blackboard.__stateIdxs.back());
         }
 
         // void tickUntilBehaviorExecuted(Blackboard& blackboard);
@@ -108,10 +124,22 @@ namespace fsm
                    + stateIdToName[transition[1]];
         }
 
+        [[nodiscard]] constexpr bool isErrorStateIdx(size_t idx) const noexcept
+        {
+            return idx < errorStateCount;
+        }
+
+        [[nodiscard]] constexpr bool isErrorTransition(
+            const detail::CompiledTransition& transition) const noexcept
+        {
+            return transition.getSize() == 1u && isErrorStateIdx(transition[0]);
+        }
+
     private:
         std::vector<std::string> stateIdToName;
         std::vector<detail::CompiledState<BbT>> states;
         size_t entryStateIdx = 0;
         size_t errorStateCount = 0;
+        detail::CompiledConditionalTransition<BbT> globalErrorTransition;
     };
 } // namespace fsm

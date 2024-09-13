@@ -42,7 +42,9 @@ namespace fsm::detail
                     replacePlaceholderTransitionsWithCorrectOnes(stateContext);
                 }
             }
-            return Fsm(std::move(context));
+
+            auto&& index = detail::createStateIndexFromBuilderContext(context);
+            return Fsm(index, std::move(context));
         }
 
     private:

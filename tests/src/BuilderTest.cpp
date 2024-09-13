@@ -75,4 +75,33 @@ TEST_CASE("[Builder]")
             // clang-format on
         }
     }
+
+    SECTION("Can call every single function")
+    {
+        // clang-format off
+        std::ignore = fsm::Builder<Blackboard>()
+            .withErrorMachine()
+                .useGlobalEntryCondition(alwaysTrue)
+                .withEntryState("A")
+                    .when(alwaysTrue).goToState("B")
+                    .orWhen(alwaysTrue).restart()
+                    .otherwiseExec(nothing).andGoToState("B")
+                .withState("B")
+                    .exec(nothing).andLoop()
+                .done()
+            .withSubmachine("S")
+                .withEntryState("A")
+                    .when(alwaysTrue).error()
+                    .orWhen(alwaysTrue).finish()
+                    .orWhen(alwaysTrue).goToState("A")
+                    .otherwiseExec(nothing).andFinish()
+                .done()
+            .withMainMachine()
+                .withEntryState("A")
+                    .when(alwaysTrue).goToMachine("S").thenGoToState("A")
+                    .otherwiseExec(nothing).andGoToMachine("S").thenGoToState("A")
+                .done()
+            .build();
+        // clang-format on
+    }
 }

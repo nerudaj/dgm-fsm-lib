@@ -6,74 +6,6 @@
 
 TEST_CASE("[FSM]")
 {
-    auto handleSeparator = [](Blackboard& bb)
-    {
-        storeWord(bb);
-        advanceChar(bb);
-    };
-
-    auto handleNewline = [](Blackboard& bb)
-    {
-        storeWord(bb);
-        startLine(bb);
-        advanceChar(bb);
-    };
-
-    // clang-format off
-    auto&& fsm = fsm::Builder<Blackboard>()
-        .withNoErrorMachine()
-        .withSubmachine("Shifter")
-            .withEntryState("Shift")
-                .exec(advanceChar).andFinish()
-            .done()
-        .withMainMachine()
-            .withEntryState("Start")
-                .when(isEof).goToState("Error")
-                .orWhen(isEscapeChar)
-                    .goToMachine("Shifter").thenGoToState("Escaped")
-                .orWhen(isSeparatorChar).goToState("SeparatorChar")
-                .orWhen(isNewlineChar).goToState("NewlineChar")
-                .otherwiseExec(advanceChar).andLoop()
-            .withState("Escaped")
-                .when(isEof).goToState("Error")
-                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("CharAfterSecondEscaped")
-                .otherwiseExec(advanceChar).andLoop()
-            .withState("CharAfterSecondEscaped")
-                // doubly escaped, returning to regularly quoted
-                .when(isEof).goToState("Error")
-                .orWhen(isEscapeChar).goToMachine("Shifter").thenGoToState("Escaped") 
-                .orWhen(isSeparatorChar).goToState("SeparatorChar")
-                .orWhen(isNewlineChar).goToState("NewlineChar")
-                .otherwiseExec(nothing).andGoToState("Error")
-            .withState("SeparatorChar")
-                .exec(handleSeparator).andGoToState("Start")
-            .withState("NewlineChar")
-                .exec(handleNewline).andGoToState("CheckEof")
-            .withState("CheckEof")
-                .when(isEof).finish()
-                .otherwiseExec(nothing).andGoToState("Start")
-            .withState("Error")
-                .exec(nothing).andLoop()
-            .done()
-        .build();
-    // clang-format on
-
-    auto&& bb = Blackboard {
-        .data = "abc,cde,efg\n\"abc\",\"cd\"\"e\",efg\n",
-    };
-
-    fsm.start(bb);
-
-    while (!fsm.isFinished(bb))
-    {
-        fsm.tick(bb);
-    }
-
-    // TODO: tick until finished or errored
-}
-
-TEST_CASE("[FSM2]")
-{
     Blackboard bb;
     SECTION("Machine can finish")
     {
@@ -116,6 +48,7 @@ TEST_CASE("[FSM2]")
         REQUIRE(bb.__stateIdxs.back() == 1); // "__main__:Start"
         machine.tick(bb);
         REQUIRE(bb.__stateIdxs.back() == 0); // "__error__:Start"
+        REQUIRE(machine.isErrored(bb));
         machine.tick(bb);
         REQUIRE(bb.__stateIdxs.back() == 1); // "__main__:Start"
         REQUIRE(bb.__stateIdxs.size() == 1);
@@ -200,7 +133,7 @@ TEST_CASE("[FSM2]")
         // clang-format off
         auto&& machine = fsm::Builder<Blackboard>()
             .withErrorMachine()
-            .useGlobalEntryCondition(isExclamationMark)
+                .useGlobalEntryCondition(isExclamationMark)
                 .withEntryState("A")
                     .exec(nothing).andGoToState("B")
                 .withState("B")
