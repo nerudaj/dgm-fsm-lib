@@ -92,14 +92,14 @@ namespace fsm::detail
     class [[nodiscard]] MachineBackTransitionBuilder final
     {
     public:
-        MachineBackTransitionBuilder(
+        constexpr MachineBackTransitionBuilder(
             BuilderContext<BbT>&& context, MachineId targetMachineName) noexcept
             : context(std::move(context)), targetMachineName(targetMachineName)
         {
             assert(BuildDefaultTransition);
         }
 
-        MachineBackTransitionBuilder(
+        constexpr MachineBackTransitionBuilder(
             BuilderContext<BbT>&& context,
             MachineId targetMachineName,
             Condition<BbT>&& condition) noexcept
@@ -158,7 +158,7 @@ namespace fsm::detail
     class [[nodiscard]] DefaultTransitionBuilder final
     {
     public:
-        explicit DefaultTransitionBuilder(
+        explicit constexpr DefaultTransitionBuilder(
             BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
@@ -213,7 +213,7 @@ namespace fsm::detail
          * If the current machine is a submachine, finishing returns the
          * control flow to the machine that invoked this submachine.
          */
-        auto andFinish()
+        constexpr auto andFinish() noexcept
         {
             return MachineBuilder<BbT, IsSubmachine>(std::move(context));
         }
@@ -234,7 +234,7 @@ namespace fsm::detail
     class [[nodiscard]] DefaultTransitionErrorBuilder final
     {
     public:
-        explicit DefaultTransitionErrorBuilder(
+        explicit constexpr DefaultTransitionErrorBuilder(
             BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
@@ -289,8 +289,8 @@ namespace fsm::detail
     class [[nodiscard]] ConditionTransitionBuilder final
     {
     public:
-        ConditionTransitionBuilder(
-            BuilderContext<BbT>&& context, Condition<BbT>&& condition)
+        constexpr ConditionTransitionBuilder(
+            BuilderContext<BbT>&& context, Condition<BbT>&& condition) noexcept
             : context(std::move(context)), condition(std::move(condition))
         {
         }
@@ -370,8 +370,8 @@ namespace fsm::detail
     class [[nodiscard]] ConditionTransitionErrorBuilder final
     {
     public:
-        ConditionTransitionErrorBuilder(
-            BuilderContext<BbT>&& context, Condition<BbT>&& condition)
+        constexpr ConditionTransitionErrorBuilder(
+            BuilderContext<BbT>&& context, Condition<BbT>&& condition) noexcept
             : context(std::move(context)), condition(std::move(condition))
         {
         }
@@ -411,7 +411,8 @@ namespace fsm::detail
     class [[nodiscard]] StateBuilderBase
     {
     public:
-        StateBuilderBase(BuilderContext<BbT>&& context)
+        explicit constexpr StateBuilderBase(
+            BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
         }
@@ -541,7 +542,8 @@ namespace fsm::detail
     class [[nodiscard]] MachineBuilder final
     {
     public:
-        explicit MachineBuilder(BuilderContext<BbT>&& context) noexcept
+        explicit constexpr MachineBuilder(
+            BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
         }
@@ -566,7 +568,7 @@ namespace fsm::detail
         /**
          * Finish declaration of this machine.
          */
-        auto done()
+        constexpr auto done() noexcept
         {
             if constexpr (IsSubmachine || IsErrorMachine)
             {
@@ -589,7 +591,7 @@ namespace fsm::detail
     class [[nodiscard]] MachineBuilderPreEntryPoint final
     {
     public:
-        explicit MachineBuilderPreEntryPoint(
+        explicit constexpr MachineBuilderPreEntryPoint(
             BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
@@ -631,7 +633,7 @@ namespace fsm::detail
     class [[nodiscard]] MainBuilder final
     {
     public:
-        explicit MainBuilder(BuilderContext<BbT>&& context)
+        explicit constexpr MainBuilder(BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
         }
@@ -678,7 +680,7 @@ namespace fsm::detail
     class [[nodiscard]] GlobalErrorConditionBuilder final
     {
     public:
-        explicit GlobalErrorConditionBuilder(
+        explicit constexpr GlobalErrorConditionBuilder(
             BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
@@ -693,7 +695,7 @@ namespace fsm::detail
          * There is no automated way to get to the error machine. You
          * will only be able to transition into it using the error() calls.
          */
-        auto noGlobalEntryCondition()
+        constexpr auto noGlobalEntryCondition() noexcept
         {
             return MachineBuilderPreEntryPoint<BbT, false, true>(
                 std::move(context));
@@ -707,7 +709,7 @@ namespace fsm::detail
         auto useGlobalEntryCondition(Condition<BbT>&& condition)
         {
             context.useGlobalError = true;
-            context.errorCondition = condition;
+            context.errorCondition = std::move(condition);
             return MachineBuilderPreEntryPoint<BbT, false, true>(
                 std::move(context));
         }
@@ -750,7 +752,7 @@ namespace fsm
          * builder. Calling this with no error machine causes runtime exception
          * when error().
          */
-        auto withNoErrorMachine()
+        constexpr auto withNoErrorMachine() noexcept
         {
             return detail::MainBuilder<BbT>(detail::BuilderContext<BbT> {});
         }
