@@ -2,6 +2,7 @@
 
 #include <DGM/classes/BuilderContext.hpp>
 #include <DGM/classes/CompiledContext.hpp>
+#include <DGM/classes/Constants.hpp>
 #include <DGM/classes/StateIndex.hpp>
 #include <ranges>
 
@@ -14,19 +15,37 @@ namespace fsm::detail
     getMachineAndStateNameFromFullName(const std::string& fullName);
 
     template<BlackboardTypeConcept BbT>
+    void updateIndexWithMachineContext(
+        StateIndex& index,
+        const std::string& machineName,
+        const MachineBuilderContext<BbT>& context)
+    {
+        for (auto&& [stateName, stateContext] : context.states)
+        {
+            std::ignore = stateContext;
+            index.addNameToIndex(createFullStateName(machineName, stateName));
+        }
+    }
+
+    template<BlackboardTypeConcept BbT>
     StateIndex
     createStateIndexFromBuilderContext(const BuilderContext<BbT>& context)
     {
         auto&& index = StateIndex();
 
+        // Make sure the error machine is processed first so the implementation
+        // of Fsm::isErrored is trivial
+        if (context.machines.contains(ERROR_MACHINE_NAME))
+            updateIndexWithMachineContext(
+                index,
+                ERROR_MACHINE_NAME,
+                context.machines.at(ERROR_MACHINE_NAME));
+
         for (auto&& [machineName, machineContext] : context.machines)
         {
-            for (auto&& [stateName, stateContext] : machineContext.states)
-            {
-                std::ignore = stateContext;
-                index.addNameToIndex(
-                    createFullStateName(machineName, stateName));
-            }
+            if (machineName == ERROR_MACHINE_NAME) continue;
+
+            updateIndexWithMachineContext(index, machineName, machineContext);
         }
 
         return index;
@@ -49,6 +68,15 @@ namespace fsm::detail
         const BuilderContext<BbT>& context, const StateIndex& index)
     {
         return index.getStateIndex(createFullStateName(
-            "__main__", context.machines.at("__main__").entryState));
+            MAIN_MACHINE_NAME,
+            context.machines.at(MAIN_MACHINE_NAME).entryState));
+    }
+
+    template<BlackboardTypeConcept BbT>
+    [[nodiscard]] size_t getErrorStatesCount(const BuilderContext<BbT>& context)
+    {
+        return context.machines.contains(ERROR_MACHINE_NAME)
+                   ? context.machines.at(ERROR_MACHINE_NAME).states.size()
+                   : size_t {};
     }
 } // namespace fsm::detail

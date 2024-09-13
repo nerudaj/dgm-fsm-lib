@@ -22,6 +22,11 @@ static constexpr bool isEof(const Blackboard& bb) noexcept
     return bb.data.size() == bb.charIdx;
 }
 
+static constexpr bool isExclamationMark(const Blackboard& bb) noexcept
+{
+    return bb.data[bb.charIdx] == '!';
+}
+
 static constexpr void advanceChar(Blackboard& bb)
 {
     ++bb.charIdx;

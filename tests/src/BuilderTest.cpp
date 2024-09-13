@@ -75,13 +75,4 @@ TEST_CASE("[Builder]")
             // clang-format on
         }
     }
-
-    /*
-    .withErrorMachine() / withNoErrorMachine()
-        .useGlobalEntryCondition()/.noGlobalEntryCondition()
-        .withEntryState()
-            .when().goToState() / restart()
-            .orWhen()
-            .otherwiseExec().andLoop() / andGoToState() / andRestart()
-    */
 }

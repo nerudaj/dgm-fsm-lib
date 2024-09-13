@@ -2,6 +2,7 @@
 
 #include <DGM/classes/BuilderContext.hpp>
 #include <DGM/classes/BuilderContextHelper.hpp>
+#include <DGM/classes/Constants.hpp>
 #include <DGM/classes/Error.hpp>
 #include <DGM/classes/Fsm.hpp>
 #include <DGM/classes/Helper.hpp>
@@ -36,22 +37,28 @@ namespace fsm::detail
         {
             for (auto&& [_, machineContext] : context.machines)
             {
-                for (auto&& [__, state] : machineContext.states)
+                for (auto&& [__, stateContext] : machineContext.states)
                 {
-                    for (auto&& condition : state.conditions)
-                    {
-                        if (isRestartTransition(condition.destination))
-                            setPrimaryTransitionDestinationToMainEntryPoint(
-                                condition.destination);
-                    }
-
-                    if (isRestartTransition(state.destination))
-                        setPrimaryTransitionDestinationToMainEntryPoint(
-                            state.destination);
+                    replacePlaceholderTransitionsWithCorrectOnes(stateContext);
                 }
             }
-
             return Fsm(std::move(context));
+        }
+
+    private:
+        void replacePlaceholderTransitionsWithCorrectOnes(
+            StateBuilderContext<BbT>& state)
+        {
+            for (auto&& condition : state.conditions)
+            {
+                if (isRestartTransition(condition.destination))
+                    setPrimaryTransitionDestinationToMainEntryPoint(
+                        condition.destination);
+            }
+
+            if (isRestartTransition(state.destination))
+                setPrimaryTransitionDestinationToMainEntryPoint(
+                    state.destination);
         }
 
     private:
@@ -59,13 +66,14 @@ namespace fsm::detail
             TransitionContext& destination)
         {
             destination.primary = createFullStateName(
-                "__main__", context.machines.at("__main__").entryState);
+                MAIN_MACHINE_NAME,
+                context.machines.at(MAIN_MACHINE_NAME).entryState);
         }
 
         [[nodiscard]] constexpr bool
         isRestartTransition(const TransitionContext& transition) const noexcept
         {
-            return transition.primary == "__error__:__restart__";
+            return transition.primary == RESTART_METASTATE_TRANSITION;
         }
 
     private:
@@ -215,20 +223,26 @@ namespace fsm::detail
     public:
         auto andGoToState(StateId name)
         {
-            getCurrentlyBuiltState(context).destination.primary =
-                createFullStateName(context.currentlyBuiltMachine, name);
-            return MachineBuilder<BbT, false, true>(std::move(context));
+            return andGoToStateImpl(name);
         }
 
         auto andLoop()
         {
-            return andGoToState(
+            return andGoToStateImpl(
                 getCurrentlyBuiltMachine(context).currentlyBuiltState);
         }
 
         auto andRestart()
         {
-            return andGoToState("__restart__");
+            return andGoToStateImpl(RESTART_METASTATE_NAME);
+        }
+
+    private:
+        auto andGoToStateImpl(const std::string& name)
+        {
+            getCurrentlyBuiltState(context).destination.primary =
+                createFullStateName(context.currentlyBuiltMachine, name);
+            return MachineBuilder<BbT, false, true>(std::move(context));
         }
 
     private:
@@ -285,7 +299,7 @@ namespace fsm::detail
 
         auto error()
         {
-            if (!context.machines.contains("__error__"))
+            if (!context.machines.contains(ERROR_MACHINE_NAME))
             {
                 throw new Error(
                     "You cannot call error() when no error machine was "
@@ -327,7 +341,7 @@ namespace fsm::detail
 
         auto restart()
         {
-            return goToState("__restart__");
+            return goToState(RESTART_METASTATE_NAME);
         }
 
     private:
@@ -348,7 +362,7 @@ namespace fsm::detail
 
         StateBuilderBase(const StateBuilderBase&) = delete;
 
-    public:
+    protected:
         auto whenBaseImpl(Condition<BbT>&& condition)
         {
             if constexpr (IsErrorMachine)
@@ -469,8 +483,10 @@ namespace fsm::detail
         {
             insertNewStateIntoContext(name, context);
 
-            return StateBuilderBeforePickingAnything<BbT, IsSubmachine>(
-                std::move(context));
+            return StateBuilderBeforePickingAnything<
+                BbT,
+                IsSubmachine,
+                IsErrorMachine>(std::move(context));
         }
 
         auto done()
@@ -516,7 +532,7 @@ namespace fsm::detail
             if constexpr (IsErrorMachine)
             {
                 context.errorDestination.primary =
-                    createFullStateName("__error__", name);
+                    createFullStateName(ERROR_MACHINE_NAME, name);
             }
 
             return StateBuilderBeforePickingAnything<
@@ -556,7 +572,7 @@ namespace fsm::detail
 
         auto withMainMachine()
         {
-            return withSubmachine<false>("__main__");
+            return withSubmachine<false>(MAIN_MACHINE_NAME);
         }
 
     private:
@@ -616,7 +632,8 @@ namespace fsm
         auto withErrorMachine()
         {
             auto&& context = detail::BuilderContext<BbT> {};
-            detail::insertNewMachineIntoContext("__error__", context);
+            detail::insertNewMachineIntoContext(
+                detail::ERROR_MACHINE_NAME, context);
             return detail::GlobalErrorConditionBuilder<BbT>(std::move(context));
         }
     };

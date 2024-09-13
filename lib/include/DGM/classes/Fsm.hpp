@@ -30,6 +30,7 @@ namespace fsm
             auto&& index = detail::createStateIndexFromBuilderContext(context);
 
             entryStateIdx = detail::getEntryStateIdx(context, index);
+            errorStateCount = detail::getErrorStatesCount(context);
             states = detail::Compiler::compileMachine(context, index);
             stateIdToName = index.getIndexedStateNames();
         }
@@ -86,6 +87,13 @@ namespace fsm
             return blackboard.__stateIdxs.empty();
         }
 
+        [[nodiscard]] constexpr bool
+        isErrored(const Blackboard& blackboard) const noexcept
+        {
+            return !blackboard.__stateIdxs.empty()
+                   && blackboard.__stateIdxs.back() < errorStateCount;
+        }
+
         // void tickUntilBehaviorExecuted(Blackboard& blackboard);
 
     private:
@@ -103,6 +111,7 @@ namespace fsm
     private:
         std::vector<std::string> stateIdToName;
         std::vector<detail::CompiledState<BbT>> states;
-        size_t entryStateIdx;
+        size_t entryStateIdx = 0;
+        size_t errorStateCount = 0;
     };
 } // namespace fsm
