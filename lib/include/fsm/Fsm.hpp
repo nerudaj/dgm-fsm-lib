@@ -19,11 +19,26 @@
 
 namespace fsm
 {
+    /**
+     * \brief Class representing hierarchical finite state machine
+     *
+     * \note This class can only be constructed through fsm::Builder
+     *
+     * This class is the model of the specified FSM. It contains definitions
+     * for states, transitions, submachines, etc. But it has no context of what
+     * is currently processed state. This state is stored in a 'Blackboard'
+     * class (anything that passes BlackboardTypeConcept constraint).
+     *
+     * The reason for this is that a single FSM model can be used to update
+     * multiple AI agents, each with their own Blackboard.
+     *
+     * Each Blackboard needs to be initialized before start of the simulation
+     * (\see initBlackboard). After that, you can \see tick the machine until
+     * \see isFinished.
+     */
     template<BlackboardTypeConcept BbT>
     class [[nodiscard]] Fsm final
     {
-    private:
-
     public:
         explicit Fsm(
             const detail::StateIndex& index,
@@ -43,14 +58,27 @@ namespace fsm
 
     public:
         /**
-         *  Sets up blackboard so the current state is the entry
-         *  state of the main machine
+         * Resets the blackboard so it is in entry state of
+         * the main machine.
          */
         void initBlackboard(BbT& blackboard)
         {
             blackboard.__stateIdxs = { entryStateIdx };
         }
 
+        /**
+         * Perform single update 'tick'. Tick means evaluating the current
+         * state stored in the blackboard. If one of the conditions for
+         * transition is fulfilled, the transition is taken (changing the
+         * current state). If no condition is fulfilled, state behavior (action)
+         * is triggered and then default transition is taken.
+         *
+         * If global error condition was specified, it is evaluated before
+         * evaluating the current state, possibly transitioning to the error
+         * machine.
+         *
+         * If the machine finished (\see isFinished), the function does nothing.
+         */
         void tick(BbT& blackboard)
         {
             if (blackboard.__stateIdxs.empty()) return;
@@ -98,12 +126,19 @@ namespace fsm
             detail::executeTransition(blackboard, state.defaultTransition);
         }
 
+        /**
+         * Check if the machine finished, or 'accepted'. Uninitialized
+         * blackboard (\see initBlackboard) is also considered as finished.
+         */
         [[nodiscard]] constexpr bool
         isFinished(const Blackboard& blackboard) const noexcept
         {
             return blackboard.__stateIdxs.empty();
         }
 
+        /**
+         * Check if the machine is in error submachine.
+         */
         [[nodiscard]] constexpr bool
         isErrored(const Blackboard& blackboard) const noexcept
         {

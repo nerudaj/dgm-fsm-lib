@@ -23,7 +23,7 @@ namespace fsm::detail
     class [[nodiscard]] FinalBuilder final
     {
     public:
-        explicit FinalBuilder(BuilderContext<BbT>&& context)
+        explicit constexpr FinalBuilder(BuilderContext<BbT>&& context) noexcept
             : context(std::move(context))
         {
         }
@@ -33,6 +33,9 @@ namespace fsm::detail
         FinalBuilder(const FinalBuilder&) = delete;
 
     public:
+        /**
+         * Construct the FSM model from builder definitions.
+         */
         Fsm<BbT> build()
         {
             for (auto&& [_, machineContext] : context.machines)
@@ -113,6 +116,10 @@ namespace fsm::detail
             delete;
 
     public:
+        /**
+         * When invoked submachine finishes, the control flow returns to
+         * the specified state in the currently-defined machine.
+         */
         auto thenGoToState(StateId stateName)
         {
             auto&& destination = TransitionContext {
@@ -162,11 +169,17 @@ namespace fsm::detail
         DefaultTransitionBuilder(const DefaultTransitionBuilder&) = delete;
 
     public:
+        /**
+         * Transition into a state in the currently-defined machine.
+         */
         auto andGoToState(StateId name)
         {
             return andGoToStateInternal(name);
         }
 
+        /**
+         * Transition into an entry state of a given submachine.
+         */
         auto andGoToMachine(MachineId machineName)
         {
             if (machineName.get() == context.currentlyBuiltMachine)
@@ -184,12 +197,22 @@ namespace fsm::detail
                 std::move(context), machineName);
         }
 
+        /**
+         * Loop the current state. Equivalent of going to currently-defined
+         * state.
+         */
         auto andLoop()
         {
             return andGoToStateInternal(
                 getCurrentlyBuiltMachine(context).currentlyBuiltState);
         }
 
+        /**
+         * Finish the execution of the machine, or 'accept' in university terms.
+         *
+         * If the current machine is a submachine, finishing returns the
+         * control flow to the machine that invoked this submachine.
+         */
         auto andFinish()
         {
             return MachineBuilder<BbT, IsSubmachine>(std::move(context));
@@ -223,17 +246,28 @@ namespace fsm::detail
             delete;
 
     public:
+        /**
+         * Go to a state in the error machine.
+         */
         auto andGoToState(StateId name)
         {
             return andGoToStateImpl(name);
         }
 
+        /**
+         * Loop the current state. Equivalent of going to currently-defined
+         * state.
+         */
         auto andLoop()
         {
             return andGoToStateImpl(
                 getCurrentlyBuiltMachine(context).currentlyBuiltState);
         }
 
+        /**
+         * Restart the FSM. This will transition into the entry state
+         * of the main machine.
+         */
         auto andRestart()
         {
             return andGoToStateImpl(RESTART_METASTATE_NAME);
@@ -266,6 +300,9 @@ namespace fsm::detail
         ConditionTransitionBuilder(const ConditionTransitionBuilder&) = delete;
 
     public:
+        /**
+         * Transition into a state in the currently-defined machine.
+         */
         auto goToState(StateId name)
         {
             addConditionalTransitionToStateInCurrentMachine(
@@ -273,6 +310,9 @@ namespace fsm::detail
             return StateBuilder<BbT, IsSubmachine>(std::move(context));
         }
 
+        /**
+         * Transition into an entry state of a given submachine.
+         */
         auto goToMachine(MachineId machineName)
         {
             if (machineName.get() == context.currentlyBuiltMachine)
@@ -290,6 +330,12 @@ namespace fsm::detail
                 std::move(context), machineName, std::move(condition));
         }
 
+        /**
+         * Finish the execution of the machine, or 'accept' in university terms.
+         *
+         * If the current machine is a submachine, finishing returns the
+         * control flow to the machine that invoked this submachine.
+         */
         auto finish()
         {
             getCurrentlyBuiltState(context).conditions.push_back(
@@ -299,6 +345,9 @@ namespace fsm::detail
             return StateBuilder<BbT, IsSubmachine>(std::move(context));
         }
 
+        /**
+         * Transition into entry state of the error machine.
+         */
         auto error()
         {
             if (!context.machines.contains(ERROR_MACHINE_NAME))
@@ -334,6 +383,9 @@ namespace fsm::detail
             const ConditionTransitionErrorBuilder&) = delete;
 
     public:
+        /**
+         * Transition into a state in the error machine.
+         */
         auto goToState(StateId name)
         {
             addConditionalTransitionToStateInCurrentMachine(
@@ -341,6 +393,10 @@ namespace fsm::detail
             return StateBuilder<BbT, false, true>(std::move(context));
         }
 
+        /**
+         * Restart the FSM. This will transition into the entry state
+         * of the main machine.
+         */
         auto restart()
         {
             return goToState(RESTART_METASTATE_NAME);
@@ -420,12 +476,18 @@ namespace fsm::detail
             const StateBuilderBeforePickingAnything&) = delete;
 
     public:
+        /**
+         * When ticked, check this condition.
+         */
         auto when(Condition<BbT>&& condition)
         {
             return StateBuilderBase<BbT, IsSubmachine, IsErrorMachine>::
                 whenBaseImpl(std::move(condition));
         }
 
+        /**
+         * When ticked, execute this action.
+         */
         auto exec(Action<BbT>&& action)
         {
             return StateBuilderBase<BbT, IsSubmachine, IsErrorMachine>::
@@ -452,12 +514,19 @@ namespace fsm::detail
         StateBuilder(const StateBuilder&) = delete;
 
     public:
+        /**
+         * Declare another condition for this state.
+         */
         auto orWhen(Condition<BbT>&& condition)
         {
             return StateBuilderBase<BbT, IsSubmachine, IsErrorMachine>::
                 whenBaseImpl(std::move(condition));
         }
 
+        /**
+         * Declare default action that is performed when no condition
+         * is fulfilled.
+         */
         auto otherwiseExec(Action<BbT>&& action)
         {
             return StateBuilderBase<BbT, IsSubmachine, IsErrorMachine>::
@@ -481,6 +550,9 @@ namespace fsm::detail
         MachineBuilder(const MachineBuilder&) = delete;
 
     public:
+        /**
+         * Declare additional state definition for this machine.
+         */
         auto withState(StateId name)
         {
             insertNewStateIntoContext(name, context);
@@ -491,6 +563,9 @@ namespace fsm::detail
                 IsErrorMachine>(std::move(context));
         }
 
+        /**
+         * Finish declaration of this machine.
+         */
         auto done()
         {
             if constexpr (IsSubmachine || IsErrorMachine)
@@ -526,6 +601,11 @@ namespace fsm::detail
             delete;
 
     public:
+        /**
+         * Define entry state for the machine. Whenever execution
+         * flow enters the currently-defined machine, it will go
+         * to this entry state
+         */
         auto withEntryState(StateId name)
         {
             getCurrentlyBuiltMachine(context).entryState = name;
@@ -560,6 +640,15 @@ namespace fsm::detail
         MainBuilder(const MainBuilder&) = delete;
 
     public:
+        /**
+         * Declare a named submachine. Submachines act like
+         * functions, but for FSM. You can transition into it and
+         * once it finishes, you will get to a specified state in the
+         * calling machine.
+         *
+         * Submachine can also invoke other submachines, but there
+         * can never be recursion.
+         */
         template<bool IsSubmachine = true>
         auto withSubmachine(MachineId name)
         {
@@ -572,6 +661,10 @@ namespace fsm::detail
                 std::move(context));
         }
 
+        /**
+         * Declare the main machine of the FSM. You won't be able to
+         * declare any additional submachines after this point.
+         */
         auto withMainMachine()
         {
             return withSubmachine<false>(MAIN_MACHINE_NAME);
@@ -596,12 +689,21 @@ namespace fsm::detail
             delete;
 
     public:
+        /**
+         * There is no automated way to get to the error machine. You
+         * will only be able to transition into it using the error() calls.
+         */
         auto noGlobalEntryCondition()
         {
             return MachineBuilderPreEntryPoint<BbT, false, true>(
                 std::move(context));
         }
 
+        /**
+         * Global error condition is evaluated during each fsm::Fsm::tick()
+         * before anything else. If condition is fulfilled, the FSM transitions
+         * into entry state of the error machine.
+         */
         auto useGlobalEntryCondition(Condition<BbT>&& condition)
         {
             context.useGlobalError = true;
@@ -617,6 +719,21 @@ namespace fsm::detail
 
 namespace fsm
 {
+    /**
+     * \brief FSM builder
+     *
+     * This builder provides a convenient API for constructing
+     * hierarchical finite state machines.
+     *
+     * It has a few restrictions - machine names starting with two
+     * underscores (__) are reserved by the library.
+     *
+     * You can only go to submachines that were previously defined
+     * (you cannot recurse on a submachine, nor directly or indirectly).
+     *
+     * There can't be duplicate submachine names or duplicate state names
+     * within a machine. State names can be duplicated across (sub)machines.
+     */
     template<BlackboardTypeConcept BbT>
     class [[nodiscard]] Builder final
     {
@@ -626,11 +743,24 @@ namespace fsm
         Builder(const Builder&) = delete;
 
     public:
+        /**
+         * \brief Construct a FSM without a dedicated error-case submachine
+         *
+         * This means you must not use error() in a certain parts of the
+         * builder. Calling this with no error machine causes runtime exception
+         * when error().
+         */
         auto withNoErrorMachine()
         {
             return detail::MainBuilder<BbT>(detail::BuilderContext<BbT> {});
         }
 
+        /**
+         * \brief Construct a FSM with a dedicate error-case machine
+         *
+         * This allows you to use error() calls and to set a global error
+         * condition.
+         */
         auto withErrorMachine()
         {
             auto&& context = detail::BuilderContext<BbT> {};
