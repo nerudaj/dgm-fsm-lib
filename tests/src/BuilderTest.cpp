@@ -1,7 +1,7 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
-#include <DGM/classes/Builder.hpp>
 #include <catch2/catch_all.hpp>
+#include <fsm/Builder.hpp>
 
 TEST_CASE("[Builder]")
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/Helper.hpp>
+#include <fsm/detail/BuilderContext.hpp>
+#include <fsm/detail/Helper.hpp>
 
 namespace fsm::detail
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DGM/classes/Types.hpp>
+#include <fsm/Types.hpp>
 #include <string>
 #include <vector>
 

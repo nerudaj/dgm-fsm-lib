@@ -1,12 +1,12 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/BuilderContextHelper.hpp>
-#include <DGM/classes/Constants.hpp>
-#include <DGM/classes/Error.hpp>
-#include <DGM/classes/Fsm.hpp>
-#include <DGM/classes/Helper.hpp>
-#include <DGM/classes/Types.hpp>
+#include <fsm/Error.hpp>
+#include <fsm/Fsm.hpp>
+#include <fsm/Types.hpp>
+#include <fsm/detail/BuilderContext.hpp>
+#include <fsm/detail/BuilderContextHelper.hpp>
+#include <fsm/detail/Constants.hpp>
+#include <fsm/detail/Helper.hpp>
 
 namespace fsm::detail
 {

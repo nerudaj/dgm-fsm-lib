@@ -1,9 +1,9 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/CompiledContext.hpp>
-#include <DGM/classes/Constants.hpp>
-#include <DGM/classes/StateIndex.hpp>
+#include <fsm/detail/BuilderContext.hpp>
+#include <fsm/detail/CompiledContext.hpp>
+#include <fsm/detail/Constants.hpp>
+#include <fsm/detail/StateIndex.hpp>
 #include <ranges>
 
 namespace fsm::detail

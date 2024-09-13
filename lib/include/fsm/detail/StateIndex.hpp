@@ -1,8 +1,8 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/Error.hpp>
 #include <format>
+#include <fsm/Error.hpp>
+#include <fsm/detail/BuilderContext.hpp>
 #include <unordered_map>
 
 namespace fsm::detail

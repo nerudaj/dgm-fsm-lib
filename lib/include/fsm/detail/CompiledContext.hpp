@@ -1,7 +1,7 @@
 #pragma once
 
-#include <DGM/classes/Types.hpp>
 #include <cassert>
+#include <fsm/Types.hpp>
 #include <vector>
 
 namespace fsm::detail

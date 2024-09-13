@@ -1,5 +1,5 @@
-#include <DGM/classes/Compiler.hpp>
 #include <catch2/catch_all.hpp>
+#include <fsm/detail/Compiler.hpp>
 
 TEST_CASE("[Compiler]")
 {

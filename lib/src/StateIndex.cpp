@@ -1,4 +1,4 @@
-#include "DGM/classes/StateIndex.hpp"
+#include "fsm/detail/StateIndex.hpp"
 #include <algorithm>
 #include <ranges>
 

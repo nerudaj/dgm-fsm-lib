@@ -1,8 +1,8 @@
 #pragma once
 
-#include <DGM/classes/NonEmptyString.hpp>
-#include <DGM/classes/Types.hpp>
 #include <format>
+#include <fsm/Types.hpp>
+#include <fsm/detail/NonEmptyString.hpp>
 #include <map>
 #include <string>
 #include <vector>

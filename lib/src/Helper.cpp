@@ -1,5 +1,5 @@
-#include <DGM/classes/Error.hpp>
-#include <DGM/classes/Helper.hpp>
+#include <fsm/Error.hpp>
+#include <fsm/detail/Helper.hpp>
 
 std::string fsm::detail::createFullStateName(
     const std::string& machineName, const std::string& stateName)

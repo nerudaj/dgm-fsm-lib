@@ -1,10 +1,10 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/CompiledContext.hpp>
-#include <DGM/classes/Helper.hpp>
-#include <DGM/classes/StateIndex.hpp>
-#include <DGM/classes/Types.hpp>
+#include <fsm/Types.hpp>
+#include <fsm/detail/BuilderContext.hpp>
+#include <fsm/detail/CompiledContext.hpp>
+#include <fsm/detail/Helper.hpp>
+#include <fsm/detail/StateIndex.hpp>
 #include <ranges>
 
 namespace fsm::detail

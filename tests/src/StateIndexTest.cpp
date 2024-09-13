@@ -1,5 +1,5 @@
-#include <DGM/classes/StateIndex.hpp>
 #include <catch2/catch_all.hpp>
+#include <fsm/detail/StateIndex.hpp>
 
 TEST_CASE("[StateIndex]")
 {

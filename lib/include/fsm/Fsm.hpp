@@ -1,13 +1,13 @@
 #pragma once
 
-#include <DGM/classes/BuilderContext.hpp>
-#include <DGM/classes/Compiler.hpp>
-#include <DGM/classes/Error.hpp>
-#include <DGM/classes/Helper.hpp>
-#include <DGM/classes/StateIndex.hpp>
-#include <DGM/classes/Types.hpp>
 #include <cassert>
 #include <format>
+#include <fsm/Error.hpp>
+#include <fsm/Types.hpp>
+#include <fsm/detail/BuilderContext.hpp>
+#include <fsm/detail/Compiler.hpp>
+#include <fsm/detail/Helper.hpp>
+#include <fsm/detail/StateIndex.hpp>
 #include <iostream>
 #include <map>
 #include <optional>
@@ -46,7 +46,7 @@ namespace fsm
          *  Sets up blackboard so the current state is the entry
          *  state of the main machine
          */
-        void start(BbT& blackboard)
+        void initBlackboard(BbT& blackboard)
         {
             blackboard.__stateIdxs = { entryStateIdx };
         }
@@ -57,7 +57,8 @@ namespace fsm
 
             auto currentStateIdx = detail::popTopState(blackboard);
 
-            if (globalErrorTransition.onConditionHit(blackboard))
+            if (!isErrorStateIdx(currentStateIdx)
+                && globalErrorTransition.onConditionHit(blackboard))
             {
                 blackboard.__stateIdxs.clear();
                 detail::executeTransition(
@@ -109,8 +110,6 @@ namespace fsm
             return !blackboard.__stateIdxs.empty()
                    && isErrorStateIdx(blackboard.__stateIdxs.back());
         }
-
-        // void tickUntilBehaviorExecuted(Blackboard& blackboard);
 
     private:
         std::string

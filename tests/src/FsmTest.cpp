@@ -1,8 +1,7 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
-#include <DGM/classes/Builder.hpp>
-#include <DGM/classes/Fsm.hpp>
 #include <catch2/catch_all.hpp>
+#include <fsm/Builder.hpp>
 
 TEST_CASE("[FSM]")
 {
@@ -21,7 +20,7 @@ TEST_CASE("[FSM]")
 
         REQUIRE(machine.isFinished(
             bb)); // considered finished before being initialized
-        machine.start(bb);
+        machine.initBlackboard(bb);
         machine.tick(bb);
         REQUIRE(machine.isFinished(bb));
     }
@@ -43,7 +42,7 @@ TEST_CASE("[FSM]")
             .build();
         // clang-format on
 
-        machine.start(bb);
+        machine.initBlackboard(bb);
 
         REQUIRE(bb.__stateIdxs.back() == 1); // "__main__:Start"
         machine.tick(bb);
@@ -77,7 +76,7 @@ TEST_CASE("[FSM]")
         // 1: __main__:A
         // 2: __main__:B
 
-        machine.start(bb);
+        machine.initBlackboard(bb);
         REQUIRE(bb.__stateIdxs.back() == 1);
         REQUIRE(bb.__stateIdxs.size() == 1);
         machine.tick(bb);
@@ -117,7 +116,7 @@ TEST_CASE("[FSM]")
             .build();
         // clang-format on
 
-        machine.start(bb);
+        machine.initBlackboard(bb);
         machine.tick(bb); // going to 2
         REQUIRE(bb.__stateIdxs.size() == 2);
         machine.tick(bb); // going to 1
@@ -175,7 +174,7 @@ TEST_CASE("[FSM]")
             bb.data = "\"a!";
         }
 
-        machine.start(bb);
+        machine.initBlackboard(bb);
         machine.tick(bb);
         machine.tick(bb);
         machine.tick(bb);
@@ -183,5 +182,9 @@ TEST_CASE("[FSM]")
         REQUIRE(!machine.isErrored(bb));
         machine.tick(bb);
         REQUIRE(machine.isErrored(bb));
+        REQUIRE(bb.__stateIdxs.back() == 0);
+        machine.tick(bb);
+        REQUIRE(machine.isErrored(bb));
+        REQUIRE(bb.__stateIdxs.back() == 1);
     }
 }

@@ -1,4 +1,4 @@
-#include <DGM/classes/Compiler.hpp>
+#include <fsm/detail/Compiler.hpp>
 
 fsm::detail::CompiledTransition fsm::detail::Compiler::compileTransition(
     const TransitionContext& destination, const StateIndex& index)

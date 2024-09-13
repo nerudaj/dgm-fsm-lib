@@ -1,6 +1,6 @@
 #include "Blackboard.hpp"
-#include <DGM/classes/Helper.hpp>
 #include <catch2/catch_all.hpp>
+#include <fsm/detail/Helper.hpp>
 
 TEST_CASE("[Helper]")
 {
