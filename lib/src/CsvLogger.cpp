@@ -4,10 +4,10 @@
 fsm::CsvLogger::CsvLogger(const std::filesystem::path& logFilePath)
     : outstream(logFilePath)
 {
-    log("CurrentState", "Blackboard", "Message", "TargetState");
+    logImplementation("CurrentState", "Blackboard", "Message", "TargetState");
 }
 
-void fsm::CsvLogger::log(
+void fsm::CsvLogger::logImplementation(
     const std::string& currentStateName,
     const std::string& blackboardLog,
     const std::string& message,

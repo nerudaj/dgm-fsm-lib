@@ -6,9 +6,9 @@ namespace fsm
 {
     class [[nodiscard]] NullLogger final : public LoggerInterface
     {
-    public:
-        void
-        log(const std::string&,
+    protected:
+        void logImplementation(
+            const std::string&,
             const std::string&,
             const std::string&,
             const std::string&) override

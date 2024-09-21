@@ -8,6 +8,8 @@
 #include <fsm/detail/Compiler.hpp>
 #include <fsm/detail/Helper.hpp>
 #include <fsm/detail/StateIndex.hpp>
+#include <fsm/logging/LoggerInterface.hpp>
+#include <fsm/logging/NullLogger.hpp>
 #include <iostream>
 #include <map>
 #include <optional>
@@ -55,6 +57,11 @@ namespace fsm
         Fsm(const Fsm&) = delete;
 
     public:
+        void setLogger(LoggerInterface& _logger)
+        {
+            logger = _logger;
+        }
+
         /**
          * Perform single update 'tick'. Tick means evaluating the current
          * state stored in the blackboard. If one of the conditions for
@@ -77,6 +84,12 @@ namespace fsm
             if (!isErrorStateIdx(currentStateIdx)
                 && globalErrorTransition.onConditionHit(blackboard))
             {
+                logger.get().log(
+                    stateIdToName[currentStateIdx],
+                    blackboard,
+                    "Global error condition hit",
+                    getTransitionLog(globalErrorTransition.transition));
+
                 blackboard.__stateIdxs.clear();
                 detail::executeTransition(
                     blackboard, globalErrorTransition.transition);
@@ -90,10 +103,10 @@ namespace fsm
             {
                 if (condition.onConditionHit(blackboard))
                 {
-                    std::println(
-                        "{},Condition {} hit,->{}",
+                    logger.get().log(
                         stateIdToName[currentStateIdx],
-                        condition.onConditionHit.target_type().name(),
+                        blackboard,
+                        "Condition hit",
                         getTransitionLog(condition.transition));
 
                     if (isErrorTransition(condition.transition))
@@ -107,10 +120,10 @@ namespace fsm
             }
 
             state.executeBehavior(blackboard);
-            std::println(
-                "{},Behavior {} executed,->{}",
+            logger.get().log(
                 stateIdToName[currentStateIdx],
-                state.executeBehavior.target_type().name(),
+                blackboard,
+                "Behavior executed",
                 getTransitionLog(state.defaultTransition));
             detail::executeTransition(blackboard, state.defaultTransition);
         }
@@ -159,6 +172,8 @@ namespace fsm
         }
 
     private:
+        static inline NullLogger defaultLogger = NullLogger();
+        std::reference_wrapper<LoggerInterface> logger = defaultLogger;
         std::vector<std::string> stateIdToName;
         std::vector<detail::CompiledState<BbT>> states;
         size_t errorStateEndIdx = 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <format>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -27,6 +28,20 @@ namespace fsm
      */
     template<class T>
     concept BlackboardTypeConcept = std::derived_from<T, BlackboardBase>;
+
+    // Helper to detect if std::formatter<T, CharT> is specialized
+    template<typename T, typename CharT, typename = void>
+    struct IsFormatterSpecializedForBlackboard : std::false_type
+    {
+    };
+
+    template<typename T, typename CharT>
+    struct IsFormatterSpecializedForBlackboard<
+        T,
+        CharT,
+        std::void_t<decltype(std::formatter<T, CharT> {})>> : std::true_type
+    {
+    };
 
     namespace detail
     {

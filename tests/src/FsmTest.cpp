@@ -1,11 +1,14 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
+#include "StdoutCsvLogger.hpp"
 #include <catch2/catch_all.hpp>
 #include <fsm/Builder.hpp>
 
 TEST_CASE("[FSM]")
 {
     Blackboard bb;
+    StdoutCsvLogger logger;
+
     SECTION("Machine can finish")
     {
         // clang-format off
@@ -167,6 +170,8 @@ TEST_CASE("[FSM]")
         {
             bb.data = "\"a!";
         }
+
+        machine.setLogger(logger);
 
         machine.tick(bb);
         machine.tick(bb);

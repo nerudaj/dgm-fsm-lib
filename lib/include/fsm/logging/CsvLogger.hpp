@@ -11,9 +11,9 @@ namespace fsm
     public:
         CsvLogger(const std::filesystem::path& logFilePath);
 
-    public:
-        void
-        log(const std::string& currentStateName,
+    protected:
+        void logImplementation(
+            const std::string& currentStateName,
             const std::string& blackboardLog,
             const std::string& message,
             const std::string& targetState) override;
