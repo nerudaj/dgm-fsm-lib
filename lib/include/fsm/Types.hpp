@@ -18,7 +18,8 @@ namespace fsm
      */
     struct [[nodiscard]] BlackboardBase
     {
-        std::vector<size_t> __stateIdxs;
+        // 0u is guaranteed to be the entry point of the machine
+        std::vector<size_t> __stateIdxs = { size_t {} };
     };
 
     /**

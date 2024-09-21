@@ -8,23 +8,56 @@ TEST_CASE("[Helper]")
 
     SECTION("createStateIndexFromBuilderContext")
     {
-        auto&& index =
-            createStateIndexFromBuilderContext(BuilderContext<Blackboard> {
-                .machines = {
-                    { "machine1",
-                      MachineBuilderContext<Blackboard> {
-                          .states = { { "Start", {} }, { "End", {} } } } },
-                    { "machine2",
-                      MachineBuilderContext<Blackboard> {
-                          .states = { { "Start", {} }, { "End", {} } } } } } });
+        SECTION("Without error states")
+        {
+            auto&& index =
+                createStateIndexFromBuilderContext(BuilderContext<Blackboard> {
+                    .machines = {
+                        { "__main__",
+                          MachineBuilderContext<Blackboard> {
+                              .entryState = "Start",
+                              .states = { { "Start", {} }, { "End", {} } } } },
+                        { "machine2",
+                          MachineBuilderContext<Blackboard> {
+                              .states = { { "Start", {} },
+                                          { "End", {} } } } } } });
 
-        auto&& indexedNames = index.getIndexedStateNames();
+            auto&& indexedNames = index.getIndexedStateNames();
 
-        REQUIRE(indexedNames.size() == 4u);
-        REQUIRE(indexedNames[0] == "machine1:End");
-        REQUIRE(indexedNames[1] == "machine1:Start");
-        REQUIRE(indexedNames[2] == "machine2:End");
-        REQUIRE(indexedNames[3] == "machine2:Start");
+            REQUIRE(indexedNames.size() == 4u);
+            REQUIRE(indexedNames[0] == "__main__:Start");
+            REQUIRE(indexedNames[1] == "__main__:End");
+            REQUIRE(indexedNames[2] == "machine2:End");
+            REQUIRE(indexedNames[3] == "machine2:Start");
+        }
+
+        SECTION("With error states")
+        {
+            auto&& index =
+                createStateIndexFromBuilderContext(BuilderContext<Blackboard> {
+                    .machines = {
+                        { "__main__",
+                          MachineBuilderContext<Blackboard> {
+                              .entryState = "Start",
+                              .states = { { "Start", {} }, { "End", {} } } } },
+                        { "machine2",
+                          MachineBuilderContext<Blackboard> {
+                              .states = { { "Start", {} }, { "End", {} } } } },
+                        { "__error__",
+                          MachineBuilderContext<Blackboard> {
+                              .states = { { "Start", {} }, { "End", {} } } } },
+                    } });
+
+            auto&& indexedNames = index.getIndexedStateNames();
+
+            REQUIRE(indexedNames.size() == 6u);
+            REQUIRE(indexedNames[0] == "__main__:Start");
+            REQUIRE(indexedNames[1] == "__error__:End");
+            REQUIRE(indexedNames[2] == "__error__:Start");
+            REQUIRE(indexedNames[3] == "__main__:End");
+            REQUIRE(indexedNames[4] == "machine2:End");
+            REQUIRE(indexedNames[5] == "machine2:Start");
+        }
     }
 
     SECTION("Full state name")

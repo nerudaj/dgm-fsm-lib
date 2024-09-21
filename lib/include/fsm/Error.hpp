@@ -7,6 +7,10 @@
 
 namespace fsm
 {
+    /**
+     * Library error type used in exceptions.
+     * It contains a message with a serialized stack trace.
+     */
     class Error : public std::runtime_error
     {
     public:

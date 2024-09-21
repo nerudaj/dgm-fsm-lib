@@ -22,6 +22,10 @@ namespace fsm::detail
     {
         for (auto&& [stateName, stateContext] : context.states)
         {
+            if (machineName == MAIN_MACHINE_NAME
+                && stateName == context.entryState) [[unlikely]]
+                continue;
+
             std::ignore = stateContext;
             index.addNameToIndex(createFullStateName(machineName, stateName));
         }
@@ -33,8 +37,14 @@ namespace fsm::detail
     {
         auto&& index = StateIndex();
 
-        // Make sure the error machine is processed first so the implementation
-        // of Fsm::isErrored is trivial
+        // Make sure the first index is the main machine entry point
+        // This makes blackboard initialization trivial
+        index.addNameToIndex(createFullStateName(
+            MAIN_MACHINE_NAME,
+            context.machines.at(MAIN_MACHINE_NAME).entryState));
+
+        // Then make sure the error machine is processed next so the
+        // implementation of Fsm::isErrored is trivial
         if (context.machines.contains(ERROR_MACHINE_NAME))
             updateIndexWithMachineContext(
                 index,
@@ -61,15 +71,6 @@ namespace fsm::detail
             bb.__stateIdxs.end(),
             reverseTransition.begin(),
             reverseTransition.end());
-    }
-
-    template<BlackboardTypeConcept BbT>
-    [[nodiscard]] size_t getEntryStateIdx(
-        const BuilderContext<BbT>& context, const StateIndex& index)
-    {
-        return index.getStateIndex(createFullStateName(
-            MAIN_MACHINE_NAME,
-            context.machines.at(MAIN_MACHINE_NAME).entryState));
     }
 
     template<BlackboardTypeConcept BbT>

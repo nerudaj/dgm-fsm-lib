@@ -40,13 +40,11 @@ namespace fsm
     class [[nodiscard]] Fsm final
     {
     public:
-        explicit Fsm(
-            const detail::StateIndex& index,
+        Fsm(const detail::StateIndex& index,
             detail::BuilderContext<BbT>&& context)
             : stateIdToName(index.getIndexedStateNames())
             , states(detail::Compiler::compileMachine(context, index))
-            , entryStateIdx(detail::getEntryStateIdx(context, index))
-            , errorStateCount(detail::getErrorStatesCount(context))
+            , errorStateEndIdx(detail::getErrorStatesCount(context) + 1)
             , globalErrorTransition(
                   detail::Compiler::compileGlobalErrorTransition<BbT>(
                       context, index))
@@ -57,15 +55,6 @@ namespace fsm
         Fsm(const Fsm&) = delete;
 
     public:
-        /**
-         * Resets the blackboard so it is in entry state of
-         * the main machine.
-         */
-        void initBlackboard(BbT& blackboard)
-        {
-            blackboard.__stateIdxs = { entryStateIdx };
-        }
-
         /**
          * Perform single update 'tick'. Tick means evaluating the current
          * state stored in the blackboard. If one of the conditions for
@@ -160,7 +149,7 @@ namespace fsm
 
         [[nodiscard]] constexpr bool isErrorStateIdx(size_t idx) const noexcept
         {
-            return idx < errorStateCount;
+            return 0 < idx && idx < errorStateEndIdx;
         }
 
         [[nodiscard]] constexpr bool isErrorTransition(
@@ -172,8 +161,7 @@ namespace fsm
     private:
         std::vector<std::string> stateIdToName;
         std::vector<detail::CompiledState<BbT>> states;
-        size_t entryStateIdx = 0;
-        size_t errorStateCount = 0;
+        size_t errorStateEndIdx = 0;
         detail::CompiledConditionalTransition<BbT> globalErrorTransition;
     };
 } // namespace fsm

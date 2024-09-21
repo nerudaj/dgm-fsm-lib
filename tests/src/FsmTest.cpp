@@ -18,9 +18,7 @@ TEST_CASE("[FSM]")
             .build();
         // clang-format on
 
-        REQUIRE(machine.isFinished(
-            bb)); // considered finished before being initialized
-        machine.initBlackboard(bb);
+        REQUIRE_FALSE(machine.isFinished(bb));
         machine.tick(bb);
         REQUIRE(machine.isFinished(bb));
     }
@@ -42,14 +40,12 @@ TEST_CASE("[FSM]")
             .build();
         // clang-format on
 
-        machine.initBlackboard(bb);
-
-        REQUIRE(bb.__stateIdxs.back() == 1); // "__main__:Start"
+        REQUIRE(bb.__stateIdxs.back() == 0); // "__main__:Start"
         machine.tick(bb);
-        REQUIRE(bb.__stateIdxs.back() == 0); // "__error__:Start"
+        REQUIRE(bb.__stateIdxs.back() == 1); // "__error__:Start"
         REQUIRE(machine.isErrored(bb));
         machine.tick(bb);
-        REQUIRE(bb.__stateIdxs.back() == 1); // "__main__:Start"
+        REQUIRE(bb.__stateIdxs.back() == 0); // "__main__:Start"
         REQUIRE(bb.__stateIdxs.size() == 1);
     }
 
@@ -76,11 +72,10 @@ TEST_CASE("[FSM]")
         // 1: __main__:A
         // 2: __main__:B
 
-        machine.initBlackboard(bb);
-        REQUIRE(bb.__stateIdxs.back() == 1);
+        REQUIRE(bb.__stateIdxs.back() == 0);
         REQUIRE(bb.__stateIdxs.size() == 1);
         machine.tick(bb);
-        REQUIRE(bb.__stateIdxs.back() == 0);
+        REQUIRE(bb.__stateIdxs.back() == 1);
         REQUIRE(bb.__stateIdxs.size() == 2);
         machine.tick(bb);
         REQUIRE(bb.__stateIdxs.back() == 2);
@@ -116,7 +111,6 @@ TEST_CASE("[FSM]")
             .build();
         // clang-format on
 
-        machine.initBlackboard(bb);
         machine.tick(bb); // going to 2
         REQUIRE(bb.__stateIdxs.size() == 2);
         machine.tick(bb); // going to 1
@@ -174,7 +168,6 @@ TEST_CASE("[FSM]")
             bb.data = "\"a!";
         }
 
-        machine.initBlackboard(bb);
         machine.tick(bb);
         machine.tick(bb);
         machine.tick(bb);
@@ -182,9 +175,9 @@ TEST_CASE("[FSM]")
         REQUIRE(!machine.isErrored(bb));
         machine.tick(bb);
         REQUIRE(machine.isErrored(bb));
-        REQUIRE(bb.__stateIdxs.back() == 0);
+        REQUIRE(bb.__stateIdxs.back() == 1);
         machine.tick(bb);
         REQUIRE(machine.isErrored(bb));
-        REQUIRE(bb.__stateIdxs.back() == 1);
+        REQUIRE(bb.__stateIdxs.back() == 2);
     }
 }
