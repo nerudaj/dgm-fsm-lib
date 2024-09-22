@@ -23,6 +23,6 @@ target_link_libraries ( ${TARGET}
 apply_compile_options ( ${TARGET} )
 
 add_test (
-	NAME ${PROJECT_NAME}
-	COMMAND ${PROJECT_NAME}
+	NAME ${TARGET}
+	COMMAND ${TARGET}
 )
