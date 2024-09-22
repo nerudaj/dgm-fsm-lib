@@ -41,7 +41,7 @@ install (
 
 # Packaging
 if ( ${IS_PROJECT_TOP_LEVEL} )
-	set ( COMPILER_ID "${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
+	set ( COMPILER_ID "${CMAKE_CXX_COMPILER_ID}")
 	message ( "Computed compiler ID: ${COMPILER_ID}" )
 
 	set ( CPACK_GENERATOR "ZIP" )
