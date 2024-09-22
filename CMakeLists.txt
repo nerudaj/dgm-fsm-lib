@@ -40,7 +40,7 @@ install (
 )
 
 # Packaging
-if ( ${IS_PROJECT_TOP_LEVEL} )
+if ( ${PROJECT_IS_TOP_LEVEL} )
 	set ( COMPILER_ID "${CMAKE_CXX_COMPILER_ID}")
 	message ( "Computed compiler ID: ${COMPILER_ID}" )
 
