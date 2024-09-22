@@ -34,3 +34,7 @@ struct std::formatter<Blackboard, CharT>
             bb.csv.back().size());
     }
 };
+
+struct NonLoggableBlackboard : fsm::BlackboardBase
+{
+};

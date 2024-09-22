@@ -35,7 +35,7 @@ namespace fsm
                     currentStateName,
                     std::format(
                         "Blackboard at address {:#x}",
-                        static_cast<std::uintptr_t>(&blackboard)),
+                        reinterpret_cast<std::uintptr_t>(&blackboard)),
                     message,
                     targetState);
             }

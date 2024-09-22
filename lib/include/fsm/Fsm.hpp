@@ -133,7 +133,7 @@ namespace fsm
          * blackboard (\see initBlackboard) is also considered as finished.
          */
         [[nodiscard]] constexpr bool
-        isFinished(const Blackboard& blackboard) const noexcept
+        isFinished(const BbT& blackboard) const noexcept
         {
             return blackboard.__stateIdxs.empty();
         }
@@ -142,7 +142,7 @@ namespace fsm
          * Check if the machine is in error submachine.
          */
         [[nodiscard]] constexpr bool
-        isErrored(const Blackboard& blackboard) const noexcept
+        isErrored(const BbT& blackboard) const noexcept
         {
             return !blackboard.__stateIdxs.empty()
                    && isErrorStateIdx(blackboard.__stateIdxs.back());
