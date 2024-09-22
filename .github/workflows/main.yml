@@ -50,7 +50,7 @@ jobs:
       run: cpack
       
     - name: Store artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dgm-fsm-lib
         path: ${{env.BUILD_DIR}}/*.zip
