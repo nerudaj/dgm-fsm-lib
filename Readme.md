@@ -62,28 +62,28 @@ TODO
 All you need to do is to include `<fsm/Builder.hpp>` and construct the machine using a Builder object. For a simple CSV parser without quotation support, a builder code could look like this:
 
 ```c++
-auto&& machine = fsm::Builder<Blackboard>()
+auto&& machine = fsm::Builder<CsvBlackboard>()
     .withErrorMachine()
-        .noGlobalEntryCondition()
-        .withEntryState("A")
-           .exec(nothing).andLoop()
-        .done()
-    .withSubmachine("1")
-        .withEntryState("A")
-            .when(alwaysTrue).error()
-            .otherwiseExec(nothing).andLoop()
-        .done()
-    .withSubmachine("2")
-        .withEntryState("A")
-            .exec(nothing).andGoToMachine("1").thenGoToState("B")
-        .withState("B")
-            .exec(nothing).andFinish()
+    .noGlobalEntryCondition()
+        .withEntryState("Start")
+            .exec(doNothing).andLoop()
         .done()
     .withMainMachine()
-        .withEntryState("A")
-            .exec(nothing).andGoToMachine("2").thenGoToState("B")
-        .withState("B")
-            .exec(nothing).andLoop()
+        .withEntryState("Start")
+            .when(isEof).error()
+            .orWhen(isSeparator).goToState("HandleSeparator")
+            .orWhen(isNewline).goToState("HandleNewline")
+            .otherwiseExec(advanceChar).andLoop()
+        .withState("HandleSeparator")
+            .exec(handleSeparator).andGoToState("Start")
+        .withState("HandleNewline")
+            .exec([] (CsvBlackboard& bb) {
+                    handleSeparator(bb);
+                    handleNewline(bb);
+                }).andGoToState("PostNewline")
+        .withState("PostNewline")
+            .when(isEof).finish()
+            .otherwiseExec(doNothing).andGoToState("Start")
         .done()
     .build();
 ```
