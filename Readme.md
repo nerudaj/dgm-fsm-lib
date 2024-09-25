@@ -61,7 +61,7 @@ TODO
 
 All you need to do is to include `<fsm/Builder.hpp>` and construct the machine using a Builder object. For a simple CSV parser without quotation support, a builder code could look like this:
 
-```cpp
+```c++
 auto&& machine = fsm::Builder<Blackboard>()
     .withErrorMachine()
         .noGlobalEntryCondition()
@@ -94,7 +94,7 @@ Refer to [example code](examples/02-simple-fsm) for more info.
 
 The library comes pre-packaged with a simple CSV-based logger, but you can implement your own if you wish. The default logger can be used like this:
 
-```cpp
+```c++
 #include <fsm/logging/CsvLogger.hpp>
 
 //... create machine
@@ -108,7 +108,7 @@ The library offers the ability to export a diagram representation of the FSM. Cu
 
 You can export just by including `<fsm/exports/MermaidExporter.hpp` and calling the export function right before the build function:
 
-```cpp
+```c++
 auto&& machine = fsm::Builder<Blackboard>()
 	// building machine
     .exportDiagram(fsm::MermaidExporter(std::cout))
