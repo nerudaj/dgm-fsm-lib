@@ -2,14 +2,14 @@ function ( fetch_cpp_init )
     include ( FetchContent )
 
     FetchContent_Declare (
-        cppinit
-        GIT_REPOSITORY https://github.com/nerudaj/clang-format
-        GIT_TAG "feature-cmake-scripts"
+        cpp-init
+        GIT_REPOSITORY https://github.com/nerudaj/cpp-init
+        GIT_TAG "v0.1.1"
     )
 
-    FetchContent_MakeAvailable ( cppinit )
+    FetchContent_MakeAvailable ( cpp-init )
 
-    set ( CPPINIT_FOLDER "${cppinit_SOURCE_DIR}" PARENT_SCOPE )
+    set ( CPPINIT_FOLDER "${cpp-init_SOURCE_DIR}" PARENT_SCOPE )
 endfunction ()
 
 fetch_cpp_init ()
