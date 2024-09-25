@@ -4,6 +4,7 @@ include ( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_cpp_init.cmake" )
 
 option ( BOOTSTRAP_CPM "Whether to download CPM" ON )
 option ( BUILD_TESTS "Build unit testing target" ON )
+option ( BUILD_EXAMPLES "Build example targets" ON )
 
 if ( ${BOOTSTRAP_CPM} )
 	bootstrap_cpm ()
@@ -21,6 +22,10 @@ add_subdirectory ( "${PROJECT_SOURCE_DIR}/lib" )
 if ( ${BUILD_TESTS} )
 	enable_testing()
 	add_subdirectory ( "${PROJECT_SOURCE_DIR}/tests" )
+endif ()
+
+if ( ${BUILD_EXAMPLES} )
+	add_subdirectory ( "${PROJECT_SOURCE_DIR}/examples" )
 endif ()
 
 # Packaging rules
