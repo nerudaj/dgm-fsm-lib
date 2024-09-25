@@ -7,6 +7,7 @@
 #include <fsm/detail/BuilderContextHelper.hpp>
 #include <fsm/detail/Constants.hpp>
 #include <fsm/detail/Helper.hpp>
+#include <fsm/exports/ExporterConcept.hpp>
 
 namespace fsm::detail
 {
@@ -33,6 +34,16 @@ namespace fsm::detail
         FinalBuilder(const FinalBuilder&) = delete;
 
     public:
+        /**
+         * Export a diagram for currently built FSM using an exporter
+         * that conforms to the ExporterTypeConcept.
+         */
+        auto& exportDiagram(ExporterTypeConcept<BbT> auto&& exporter)
+        {
+            exporter.exportDiagram(context);
+            return *this;
+        }
+
         /**
          * Construct the FSM model from builder definitions.
          */

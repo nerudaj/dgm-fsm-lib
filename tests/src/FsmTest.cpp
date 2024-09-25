@@ -3,6 +3,7 @@
 #include "StdoutCsvLogger.hpp"
 #include <catch2/catch_all.hpp>
 #include <fsm/Builder.hpp>
+#include <fsm/exports/MermaidExporter.hpp>
 
 TEST_CASE("[FSM]")
 {
@@ -111,6 +112,7 @@ TEST_CASE("[FSM]")
                 .withState("B")
                     .exec(nothing).andLoop()
                 .done()
+            .exportDiagram(fsm::MermaidExporter(std::cout))
             .build();
         // clang-format on
 
