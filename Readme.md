@@ -114,3 +114,7 @@ auto&& machine = fsm::Builder<Blackboard>()
     .exportDiagram(fsm::MermaidExporter(std::cout))
 	.build();
 ```
+
+A diagram for the CSV machine then looks like this:
+
+![CSV parser FSM](examples/03-exporting-diagrams/diagram.png)
