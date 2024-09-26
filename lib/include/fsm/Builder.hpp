@@ -133,14 +133,27 @@ namespace fsm::detail
          */
         auto thenGoToState(StateId stateName)
         {
-            auto&& destination = TransitionContext {
+            return invokeSubmachine(TransitionContext {
                 .primary = createFullStateName(
                     targetMachineName,
                     context.machines.at(targetMachineName).entryState),
                 .secondary = createFullStateName(
                     context.currentlyBuiltMachine, stateName),
-            };
+            });
+        }
 
+        auto thenFinish()
+        {
+            return invokeSubmachine(TransitionContext {
+                .primary = createFullStateName(
+                    targetMachineName,
+                    context.machines.at(targetMachineName).entryState),
+            });
+        }
+
+    private:
+        auto invokeSubmachine(TransitionContext&& destination)
+        {
             if constexpr (BuildDefaultTransition)
             {
                 getCurrentlyBuiltState(context).destination =

@@ -187,4 +187,50 @@ TEST_CASE("[FSM]")
         REQUIRE(machine.isErrored(bb));
         REQUIRE(bb.__stateIdxs.back() == 2);
     }
+
+    SECTION("Can return from multiple submachines at once")
+    {
+        // clang-format off
+        auto&& machine = fsm::Builder<Blackboard>()
+            .withNoErrorMachine()
+            .withSubmachine("3")
+                .withEntryState("C")
+                    .exec(nothing)
+                        .andFinish()
+                .done()
+            .withSubmachine("2")
+                .withEntryState("B")
+                    .exec(nothing)
+                        .andGoToMachine("3")
+                            .thenFinish()
+                .done()
+            .withSubmachine("1")
+                .withEntryState("A")
+                    .exec(nothing)
+                        .andGoToMachine("2")
+                            .thenFinish()
+                .done()
+            .withMainMachine()
+                .withEntryState("Start")
+                    .exec(nothing)
+                        .andGoToMachine("1")
+                            .thenGoToState("End")
+                .withState("End")
+                    .exec(nothing).andLoop()
+            .done()
+        .build();
+        // clang-format on
+
+        machine.setLogger(logger);
+
+        REQUIRE(bb.__stateIdxs.back() == 0u); // __main__:Start
+        machine.tick(bb);
+        REQUIRE(bb.__stateIdxs.back() == 1u); // 1:A
+        machine.tick(bb);
+        REQUIRE(bb.__stateIdxs.back() == 2u); // 2:B
+        machine.tick(bb);
+        REQUIRE(bb.__stateIdxs.back() == 3u); // 3:C
+        machine.tick(bb);
+        REQUIRE(bb.__stateIdxs.back() == 4u); // __main__:End
+    }
 }
