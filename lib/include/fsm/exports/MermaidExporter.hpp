@@ -23,6 +23,11 @@ namespace fsm
     class [[nodiscard]] MermaidExporter final
     {
     public:
+        explicit MermaidExporter(const std::filesystem::path& outFilePath)
+            : fileStream(outFilePath), save(fileStream)
+        {
+        }
+
         explicit MermaidExporter(std::ostream& stream) : save(stream) {}
 
         MermaidExporter(const MermaidExporter&) = delete;
