@@ -17,6 +17,12 @@ get_git_version (
 
 project ( dgm-fsm-lib VERSION "${GIT_PROJECT_VERSION}" )
 
+if (NOT ${PROJECT_IS_TOP_LEVEL} )
+	message ( "INFO: fsm-lib is used as a dependency, turning off unwanted features" )
+	set ( BUILD_TESTS OFF )
+	set ( BUILD_EXAMPLES OFF )
+endif ()
+
 add_subdirectory ( "${PROJECT_SOURCE_DIR}/lib" )
 
 if ( ${BUILD_TESTS} )
