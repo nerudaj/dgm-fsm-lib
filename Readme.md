@@ -7,10 +7,11 @@ This is a C++ library meant for building and running Final State Machines, with 
 ## Table of contents
 
  * [FSM architecture](#fsm-architecture)
- * [Linking the library](#linking-the-library)
+ * [Integration](#integration)
  * [Building the FSM](#building-the-fsm)
  * [Logging](#logging)
  * [Diagram exports](#diagram-exports)
+ * [Who's using fsm-cpp?](#who-s-using-fsm-cpp)
 
 ## FSM architecture
 
@@ -53,9 +54,9 @@ And since I am mentioning submachines, this library allows you to define hierarc
 
 **Blackboards** are used to store all contextual information. Unlike many other similar libraries that give you string-indexed storages that can hold a couple predefined types, here you can just provide any struct, as long as it publicly inherits from `fsm::BlackboardBase`.
 
-## Linking the library
+## Integration
 
-TODO
+You can easily get the library using CPM, or you can get it from the Releases tab. More on both approaches [here](docs/Integration.md).
 
 ## Building the FSM
 
@@ -118,3 +119,7 @@ auto&& machine = fsm::Builder<Blackboard>()
 A diagram for the CSV machine then looks like this:
 
 ![CSV parser FSM](examples/03-exporting-diagrams/diagram.png)
+
+## Who's using fsm-cpp?
+
+ * [Rend](https://nerudaj.itch.io/Rend) - Retro arena FPS
