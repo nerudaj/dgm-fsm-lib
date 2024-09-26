@@ -7,7 +7,7 @@ This library is a C++23 library, so don't forget to always enable it for your ta
 Assuming that you've enabled CPM in your CMake code, you can bring this library in like this:
 
 ```cmake
-CPMAddPackage("gh:nerudaj/fsm-cpp")
+CPMAddPackage("gh:nerudaj/fsm-cpp#2.0.0")
 
 set ( CMAKE_CXX_STANDARD 23 )
 
