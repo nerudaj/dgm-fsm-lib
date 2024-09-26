@@ -1,6 +1,5 @@
 #include <CsvBlackboard.hpp>
 #include <CsvFunctions.hpp>
-#include <StdoutLogger.hpp>
 #include <fsm/Builder.hpp>
 #include <fsm/exports/MermaidExporter.hpp>
 #include <print>
@@ -13,7 +12,7 @@ int main()
     auto fstream = std::ostringstream();
 
     // clang-format off
-    auto&& machine = fsm::Builder<CsvBlackboard>()
+    std::ignore = fsm::Builder<CsvBlackboard>()
         .withErrorMachine()
         .noGlobalEntryCondition()
             .withEntryState("Start")

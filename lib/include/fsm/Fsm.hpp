@@ -80,52 +80,31 @@ namespace fsm
             if (blackboard.__stateIdxs.empty()) return;
 
             auto currentStateIdx = detail::popTopState(blackboard);
-
-            if (!isErrorStateIdx(currentStateIdx)
-                && globalErrorTransition.onConditionHit(blackboard))
-            {
-                logger.get().log(
-                    stateIdToName[currentStateIdx],
-                    blackboard,
-                    "Global error condition hit",
-                    getTransitionLog(globalErrorTransition.transition));
-
-                blackboard.__stateIdxs.clear();
-                detail::executeTransition(
-                    blackboard, globalErrorTransition.transition);
-                return;
-            }
-
             assert(currentStateIdx < states.size());
             auto& state = states[currentStateIdx];
 
-            for (const auto& condition : state.conditionalTransitions)
+            auto log = [&](const std::string& message,
+                           const std::string& targetStateName)
             {
-                if (condition.onConditionHit(blackboard))
-                {
-                    logger.get().log(
-                        stateIdToName[currentStateIdx],
-                        blackboard,
-                        "Condition hit",
-                        getTransitionLog(condition.transition));
+                logger.get().log(
+                    reinterpret_cast<std::uintptr_t>(this),
+                    stateIdToName[currentStateIdx],
+                    blackboard,
+                    message,
+                    targetStateName);
+            };
 
-                    if (isErrorTransition(condition.transition))
-                    {
-                        blackboard.__stateIdxs.clear();
-                    }
+#define _BIND(x)                                                               \
+    std::bind(&Fsm<BbT>::x, this, std::ref(blackboard), std::cref(state))
 
-                    detail::executeTransition(blackboard, condition.transition);
-                    return;
-                }
-            }
+            std::optional<Log> result =
+                evaluateGlobalErrorCondition(blackboard, currentStateIdx)
+                    .or_else(_BIND(evaluateStateConditions))
+                    .or_else(_BIND(evaluateDefaultTransition));
 
-            state.executeBehavior(blackboard);
-            logger.get().log(
-                stateIdToName[currentStateIdx],
-                blackboard,
-                "Behavior executed",
-                getTransitionLog(state.defaultTransition));
-            detail::executeTransition(blackboard, state.defaultTransition);
+#undef _BIND
+
+            log(result.value().message, result.value().targetStateName);
         }
 
         /**
@@ -149,6 +128,69 @@ namespace fsm
         }
 
     private:
+        struct Log
+        {
+            std::string message;
+            std::string targetStateName;
+        };
+
+    private:
+        std::optional<Log>
+        evaluateGlobalErrorCondition(BbT& blackboard, size_t currentStateIdx)
+        {
+            if (isErrorStateIdx(currentStateIdx)
+                || !globalErrorTransition.onConditionHit(blackboard))
+                return std::nullopt;
+
+            blackboard.__stateIdxs.clear();
+            detail::executeTransition(
+                blackboard, globalErrorTransition.transition);
+
+            return Log {
+                .message = "Global error condition hit",
+                .targetStateName =
+                    getTransitionLog(globalErrorTransition.transition),
+            };
+        }
+
+        std::optional<Log> evaluateStateConditions(
+            BbT& blackboard, const detail::CompiledState<BbT>& state)
+        {
+            for (const auto& [idx, condition] :
+                 std::views::enumerate(state.conditionalTransitions))
+            {
+                if (condition.onConditionHit(blackboard))
+                {
+                    if (isErrorTransition(condition.transition))
+                    {
+                        blackboard.__stateIdxs.clear();
+                    }
+
+                    detail::executeTransition(blackboard, condition.transition);
+
+                    return Log {
+                        .message = std::format("Condition {} hit", idx),
+                        .targetStateName =
+                            getTransitionLog(condition.transition),
+                    };
+                }
+            }
+
+            return std::nullopt;
+        }
+
+        std::optional<Log> evaluateDefaultTransition(
+            BbT& blackboard, const detail::CompiledState<BbT>& state)
+        {
+            state.executeBehavior(blackboard);
+            detail::executeTransition(blackboard, state.defaultTransition);
+
+            return Log {
+                .message = "Behavior executed",
+                .targetStateName = getTransitionLog(state.defaultTransition),
+            };
+        }
+
         std::string
         getTransitionLog(const detail::CompiledTransition& transition)
         {

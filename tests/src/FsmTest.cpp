@@ -1,14 +1,14 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
-#include "StdoutCsvLogger.hpp"
 #include <catch2/catch_all.hpp>
 #include <fsm/Builder.hpp>
 #include <fsm/exports/MermaidExporter.hpp>
+#include <fsm/logging/CsvLogger.hpp>
 
 TEST_CASE("[FSM]")
 {
     Blackboard bb;
-    StdoutCsvLogger logger;
+    fsm::CsvLogger logger;
 
     SECTION("Machine can finish")
     {

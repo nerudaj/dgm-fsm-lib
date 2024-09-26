@@ -9,14 +9,14 @@ TEST_CASE("[Logger]")
 
     SECTION("Can log loggable blackboard")
     {
-        logger.log("", Blackboard {}, "", "");
+        logger.log(0, "", Blackboard {}, "", "");
         REQUIRE(loggerInstance.lastLogBlackboard == "Blackboard: [ charIdx: 0; wordStartIdx: 0; |csv| = 1; |csv.back()| = 0 ]");
     }
 
     SECTION("Can log unloggable blackboard")
     {
-        logger.log("", NonLoggableBlackboard {}, "", "");
-        REQUIRE(loggerInstance.lastLogBlackboard.starts_with(
-            "Blackboard at address 0x"));
+        logger.log(0, "", NonLoggableBlackboard {}, "", "");
+        REQUIRE(
+            loggerInstance.lastLogBlackboard.starts_with("Blackboard @ 0x"));
     }
 }

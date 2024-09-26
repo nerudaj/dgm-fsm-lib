@@ -12,5 +12,6 @@ add_executable ( ${TARGET}
 target_link_libraries ( ${TARGET} libfsm examples-common )
 
 apply_compile_options ( ${TARGET} )
+execute_example_as_test ( ${TARGET} )
 
 set_target_properties( ${TARGET} PROPERTIES FOLDER "examples" )

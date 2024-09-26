@@ -1,7 +1,7 @@
 #include <CsvBlackboard.hpp>
 #include <CsvFunctions.hpp>
-#include <StdoutLogger.hpp>
 #include <fsm/Builder.hpp>
+#include <fsm/logging/CsvLogger.hpp>
 #include <print>
 
 int main()
@@ -35,9 +35,11 @@ int main()
         .build();
     // clang-format on
 
-    auto&& logger = StdoutLogger();
     // NOTE: To enable logging, uncomment the next line
-    // machine.setLogger(logger);
+    /*
+    auto&& logger = fsm::CsvLogger();
+    machine.setLogger(logger);
+    */
 
     auto&& runMachine = [&machine](CsvBlackboard&& blackboard)
     {

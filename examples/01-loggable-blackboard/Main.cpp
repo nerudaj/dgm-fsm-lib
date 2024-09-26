@@ -1,5 +1,5 @@
-#include <StdoutLogger.hpp>
 #include <fsm/Types.hpp>
+#include <fsm/logging/CsvLogger.hpp>
 #include <print>
 
 struct Blackboard : fsm::BlackboardBase
@@ -39,11 +39,11 @@ int main()
     // log it too
     std::println("Blackboard: {}", Blackboard {});
 
-    auto&& logger = StdoutLogger();
+    auto&& logger = fsm::CsvLogger();
 
     // Thus, this will print a pretty log of a loggable blackboard
-    logger.log("", Blackboard {}, "", "");
+    logger.log(0, "", Blackboard {}, "", "");
 
     // This one compiles and runs, but provides only blackboard address
-    logger.log("", Blackboard2 {}, "", "");
+    logger.log(0, "", Blackboard2 {}, "", "");
 }

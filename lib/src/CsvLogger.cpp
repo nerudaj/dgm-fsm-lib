@@ -2,12 +2,14 @@
 #include <print>
 
 fsm::CsvLogger::CsvLogger(const std::filesystem::path& logFilePath)
-    : outstream(logFilePath)
+    : fileStream(logFilePath), outstream(fileStream)
 {
-    logImplementation("CurrentState", "Blackboard", "Message", "TargetState");
+    logImplementation(
+        "MachineId", "CurrentState", "Blackboard", "Message", "TargetState");
 }
 
 void fsm::CsvLogger::logImplementation(
+    const std::string& fsmId,
     const std::string& currentStateName,
     const std::string& blackboardLog,
     const std::string& message,
@@ -15,7 +17,8 @@ void fsm::CsvLogger::logImplementation(
 {
     std::println(
         outstream,
-        "{},{},{},{}",
+        "{},{},{},{},{}",
+        fsmId,
         currentStateName,
         blackboardLog,
         message,

@@ -11,6 +11,7 @@ namespace fsm
             const std::string&,
             const std::string&,
             const std::string&,
+            const std::string&,
             const std::string&) override
         {
         }
