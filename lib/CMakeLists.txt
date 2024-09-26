@@ -11,8 +11,9 @@ add_library ( ${TARGET} STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/.clang-format"
 )
 
-target_include_directories ( ${TARGET}
-	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+target_include_directories ( ${TARGET} PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include>
 )
 
 apply_compile_options ( ${TARGET} )
@@ -40,3 +41,23 @@ install (
 	FILES        "${DEBUG_BINARY_DIR}/${TARGET}-d.pdb"
 	DESTINATION  "lib"
 )
+
+install ( TARGETS ${TARGET}
+	EXPORT ${TARGET}Targets
+)
+
+install(EXPORT ${TARGET}Targets
+	FILE ${TARGET}Targets.cmake
+	NAMESPACE fsm::
+	DESTINATION lib/cmake/${TARGET})
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+	"${TARGET}ConfigVersion.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion)
+
+install(
+	FILES "${TARGET}Config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}ConfigVersion.cmake"
+    DESTINATION lib/cmake/${TARGET})
