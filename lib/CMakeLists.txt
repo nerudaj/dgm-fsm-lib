@@ -1,6 +1,6 @@
 cmake_minimum_required ( VERSION 3.26 )
 
-set ( TARGET libfsm )
+set ( TARGET ${PROJECT_NAME} )
 
 bootstrap_clang_format()
 glob_headers_and_sources ( HEADERS SOURCES )

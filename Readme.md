@@ -1,12 +1,14 @@
-[![CI](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml)
+[![CI](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/nerudaj/dgm-fsm-lib/actions/workflows/main.yml) [![IntegrationTests](https://github.com/nerudaj/fsm-lib/actions/workflows/integration.yml/badge.svg?branch=main)](https://github.com/nerudaj/fsm-lib/actions/workflows/integration.yml)
 
-# fsm-cpp
+# fsm-lib
 
-This is a C++ library meant for building and running Final State Machines, with the emphasis on their usage in videogame AI. While FSMs are quite simple structures to implement, the code usually quickly devolves into a spaghetti mess. This library enforces one particular paradigm to how FSM should look like so the code can stay consistent and hopefully clean.
+This is a C++23 library for creating hierarchical finite state machines, with the emphasis on their usage in videogame AI.
+
+While FSMs are quite simple structures to implement, the code usually quickly devolves into a spaghetti mess. This library enforces one particular paradigm to how FSM should look like so the code can stay consistent and hopefully clean.
 
 ## Table of contents
 
- * [FSM architecture](#fsm-architecture)
+ * [Concepts](#concepts)
  * [Integration](#integration)
  * [Building the FSM](#building-the-fsm)
  * [Blackboards](#blackboards)
@@ -14,9 +16,11 @@ This is a C++ library meant for building and running Final State Machines, with 
  * [Diagram exports](#diagram-exports)
  * [Who's using fsm-cpp?](#whos-using-fsm-cpp)
 
-## FSM architecture
+## Concepts
 
-FSM usually consists of two things - set of conditions that allow it to jump from state to state and some behaviour that is executed in each state. Quite often, those get intermixed, so following code is no exception:
+FSM fall under two categories - Mealy and Moore. Mealy produces output (executes behavior) while transitioning from one state to another. Moore produces outputs based solely on the current state. As I percieve Moore to be more intuitive for programming, this library produces Moore's FSMs.
+
+FSMs consists of states and each state usually consists of two things. A set of conditional transitions that allow it to jump from state to state, and some behavior that is executed when the state is ticked and none of the transitions was taken. In practical code that employs switch-case approach to implement a FSM, these get intermixed quite often, so the following code is nothing unusual:
 
 ```c++
 case State::DoSomething:
@@ -39,15 +43,15 @@ case State::DoSomething:
 } break;
 ```
 
-This code implies FSM where each state in fact does job of multiple states but because the switch-case code would get really long, programmers tend to abbreviate. However, this obfuscates the general logic behind the FSM, which can really complicate developing game AI (with the second problem being that the AI designer would like to avoid C++ code and use predefined primitives instead).
+This code is bad because `State::DoSomething` covertly does a job of two states, but the author didn't want to bother with introduction of a new enumerated value and abbreviated the code. This obfuscates the general logic behind the FSM, which can really complicate developing game AI. It also makes the life of an AI designer harder as they would like to work with logical primitives and compose them into more complex actions.
 
-This library mandates that each FSM state has an ordered set of conditions associated with transitions, exactly one behavior and a default transition.
+This library mandates that each FSM state has an ordered set of conditions associated with transitions, exactly one behavior and a default transition. When a state is "ticked", the following happens:
 
-1) First evaluate all conditions in order. If any condition is evaluated to true, FSM jumps to associated state (executes transition).
+1) Evaluate all conditions in order. If any condition is evaluated to true, FSM jumps to associated state (executes transition).
 2) If no condition was true, execute behavior.
 3) After executing behavior, execute default transition. State can jump back to itself, which means it is a **looping** state.
 
-The above algorithm also defines clear boundaries for a single `tick` when updating the machine. The tick ends when FSM executes a transition, so you don't have to worry about the tick function getting stuck in an infinite loop.
+The above algorithm defines clear boundaries for a single `tick` when updating the machine. The tick ends when FSM executes a transition, so you don't have to worry about the tick function getting stuck in an infinite loop.
 
 In addition to these simple rules governing each state, a global error condition can be specified that is evaluated first when ticking the FSM and if evaluated to true, it transitions to an error submachine.
 
@@ -61,30 +65,30 @@ You can easily get the library using CPM, or you can get it from the Releases ta
 
 ## Building the FSM
 
-All you need to do is to include `<fsm/Builder.hpp>` and construct the machine using a Builder object. For a simple CSV parser without quotation support, a builder code could look like this:
+All you need to do is to include `<fsm/Builder.hpp>` and construct the machine using a Builder object. For an example CSV parser without quotation support, a builder code could look like this:
 
 ```c++
 auto&& machine = fsm::Builder<CsvBlackboard>()
-    .withErrorMachine()
+    .withErrorMachine() <-- When the current state belongs to this submachine, the fsm::Fsm::isErrored returns true
     .noGlobalEntryCondition()
         .withEntryState("Start")
-            .exec(doNothing).andLoop()
+            .exec(doNothing).andLoop() // <-- You can either loop indefinitely or you can all restart and go back to main entry state
         .done()
     .withMainMachine()
-        .withEntryState("Start")
-            .when(isEof).error()
+        .withEntryState("Start") // <-- entry point of the whole FSM
+            .when(isEof).error() // <-- When error is called, FSM transitions to the entry point of the error machine
             .orWhen(isSeparator).goToState("HandleSeparator")
             .orWhen(isNewline).goToState("HandleNewline")
             .otherwiseExec(advanceChar).andLoop()
         .withState("HandleSeparator")
             .exec(handleSeparator).andGoToState("Start")
         .withState("HandleNewline")
-            .exec([] (CsvBlackboard& bb) {
+            .exec([] (CsvBlackboard& bb) { // <-- Anything convertible to std::function can be used
                     handleSeparator(bb);
                     handleNewline(bb);
                 }).andGoToState("PostNewline")
         .withState("PostNewline")
-            .when(isEof).finish()
+            .when(isEof).finish() // <-- When the FSM finishes, the fsm::Fsm::isFinished returns true and nothing happens
             .otherwiseExec(doNothing).andGoToState("Start")
         .done()
     .build();
@@ -135,9 +139,9 @@ You can export just by including `<fsm/exports/MermaidExporter.hpp` and calling 
 
 ```c++
 auto&& machine = fsm::Builder<Blackboard>()
-	// building machine
+	// ... building machine
     .exportDiagram(fsm::MermaidExporter(std::cout))
-	.build();
+    .build();
 ```
 
 A diagram for the CSV machine then looks like this:

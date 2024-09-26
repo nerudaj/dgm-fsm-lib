@@ -9,7 +9,7 @@ add_executable ( ${TARGET}
 	"${CMAKE_CURRENT_SOURCE_DIR}/.clang-format"
 )
 
-target_link_libraries ( ${TARGET} libfsm examples-common )
+target_link_libraries ( ${TARGET} examples-common )
 
 apply_compile_options ( ${TARGET} )
 execute_example_as_test ( ${TARGET} )

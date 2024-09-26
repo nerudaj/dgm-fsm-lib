@@ -17,7 +17,7 @@ target_include_directories ( ${TARGET}
 )
 
 target_link_libraries ( ${TARGET}
-	libfsm Catch2::Catch2WithMain
+	fsm-lib Catch2::Catch2WithMain
 )
 
 apply_compile_options ( ${TARGET} )

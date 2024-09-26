@@ -7,6 +7,10 @@ target_include_directories ( ${TARGET}
 	INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
+target_link_libraries ( ${TARGET}
+	INTERFACE fsm-lib
+)
+
 function ( execute_example_as_test TARGET )
 	if ( ${BUILD_TESTS} )
 		add_test (

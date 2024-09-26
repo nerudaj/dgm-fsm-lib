@@ -6,8 +6,8 @@ set ( CMAKE_CXX_STANDARD 23 )
 
 project ( test-cpm )
 
-CPMAddPackage("gh:nerudaj/dgm-fsm-lib#v2")
+CPMAddPackage("gh:nerudaj/fsm-lib")
 
 add_executable ( ${PROJECT_NAME} Main.cpp )
 
-target_link_libraries ( ${PROJECT_NAME} libfsm )
+target_link_libraries ( ${PROJECT_NAME} fsm-lib )
