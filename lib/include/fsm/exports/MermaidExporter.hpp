@@ -53,7 +53,7 @@ namespace fsm
                     if (destination.primary.empty())
                     {
                         std::println(
-                            save, "  {} -->|finish| {}", source, "___( )");
+                            save, "  {0} -->|finish| __finish__{0}( )", source);
                     }
                     else if (source != destination.primary)
                     {
