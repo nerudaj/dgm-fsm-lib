@@ -148,8 +148,8 @@ namespace fsm
 
             return Log {
                 .message = "Global error condition hit",
-                .targetStateName =
-                    getTransitionLog(globalErrorTransition.transition),
+                .targetStateName = getTransitionLog(
+                    globalErrorTransition.transition, blackboard),
             };
         }
 
@@ -171,7 +171,7 @@ namespace fsm
                     return Log {
                         .message = std::format("Condition {} hit", idx),
                         .targetStateName =
-                            getTransitionLog(condition.transition),
+                            getTransitionLog(condition.transition, blackboard),
                     };
                 }
             }
@@ -187,19 +187,22 @@ namespace fsm
 
             return Log {
                 .message = "Behavior executed",
-                .targetStateName = getTransitionLog(state.defaultTransition),
+                .targetStateName =
+                    getTransitionLog(state.defaultTransition, blackboard),
             };
         }
 
-        std::string
-        getTransitionLog(const detail::CompiledTransition& transition)
+        std::string getTransitionLog(
+            const detail::CompiledTransition& transition, const BbT& blackboard)
         {
             if (transition.isEmpty())
-                return "Finishing";
+                if (blackboard.__stateIdxs.empty())
+                    return "Finishing";
+                else
+                    return stateIdToName[blackboard.__stateIdxs.back()];
             else if (transition.getSize() == 1u)
                 return stateIdToName[transition[0]];
-            return stateIdToName[transition[0]] + "/"
-                   + stateIdToName[transition[1]];
+            return stateIdToName[transition[0]];
         }
 
         [[nodiscard]] constexpr bool isErrorStateIdx(size_t idx) const noexcept
