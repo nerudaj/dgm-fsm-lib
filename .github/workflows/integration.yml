@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_DIR: ${{github.workspace}}/vsbuild
+  IT_DIR: ${{github.workspace}}/integration_tests
 
 jobs:
   build:
@@ -23,15 +23,15 @@ jobs:
         cmake-version: '3.26.1'
 
     - name: Configure
-      working-directory: ${{env.BUILD_DIR}}/integration_tests/cpm
+      working-directory: ${{env.IT_DIR}}/cpm
       run: |
-        mkdir "${{env.BUILD_DIR}}"
-        cd "${{env.BUILD_DIR}}"
+        mkdir _build
+        cd _build
         cmake ..
       shell: cmd
 
     - name: Build
-      working-directory: ${{env.BUILD_DIR}}/integration_tests/cpm
+      working-directory: ${{env.IT_DIR}}/cpm/_build
       run: |
         cmake --build . --config Debug
       shell: cmd
