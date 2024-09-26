@@ -6,23 +6,20 @@ class TestableLogger final : public fsm::LoggerInterface
 {
 public:
     std::string lastLogMachineId = "";
+    std::string lastLogBlackboardId = "";
     std::string lastLogCurrentState = "";
     std::string lastLogBlackboard = "";
     std::string lastLogMessage = "";
     std::string lastLogTargetState = "";
 
 protected:
-    void logImplementation(
-        const std::string& machineId,
-        const std::string& currentState,
-        const std::string& blackboardLog,
-        const std::string& message,
-        const std::string& targetState)
+    void logImplementation(const Log& log)
     {
-        lastLogMachineId = machineId;
-        lastLogCurrentState = currentState;
-        lastLogBlackboard = blackboardLog;
-        lastLogMessage = message;
-        lastLogTargetState = targetState;
+        lastLogMachineId = log.machineId;
+        lastLogBlackboardId = log.blackboardId;
+        lastLogCurrentState = log.currentStateName;
+        lastLogBlackboard = log.blackboardLog;
+        lastLogMessage = log.message;
+        lastLogTargetState = log.targetStateName;
     }
 };

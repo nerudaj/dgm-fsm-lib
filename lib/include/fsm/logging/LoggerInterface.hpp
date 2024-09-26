@@ -33,32 +33,41 @@ namespace fsm
                               BlackboardType,
                               char>::value)
             {
-                logImplementation(
-                    std::format("{:#x}", fsmId),
-                    currentStateName,
-                    std::format("{}", blackboard),
-                    message,
-                    targetStateName);
+                logImplementation(Log {
+                    .machineId = std::format("{:#x}", fsmId),
+                    .blackboardId = std::format(
+                        "{:#x}", reinterpret_cast<std::uintptr_t>(&blackboard)),
+                    .blackboardLog = std::format("{}", blackboard),
+                    .message = message,
+                    .currentStateName = currentStateName,
+                    .targetStateName = targetStateName,
+                });
             }
             else
             {
-                logImplementation(
-                    std::format("{:#x}", fsmId),
-                    currentStateName,
-                    std::format(
-                        "Blackboard @ {:#x}",
-                        reinterpret_cast<std::uintptr_t>(&blackboard)),
-                    message,
-                    targetStateName);
+                logImplementation(Log {
+                    .machineId = std::format("{:#x}", fsmId),
+                    .blackboardId = std::format(
+                        "{:#x}", reinterpret_cast<std::uintptr_t>(&blackboard)),
+                    .blackboardLog = "",
+                    .message = message,
+                    .currentStateName = currentStateName,
+                    .targetStateName = targetStateName,
+                });
             }
         }
 
     protected:
-        virtual void logImplementation(
-            const std::string& fsmId,
-            const std::string& currentStateName,
-            const std::string& blackboardLog,
-            const std::string& message,
-            const std::string& targetState) = 0;
+        struct Log
+        {
+            std::string machineId;
+            std::string blackboardId;
+            std::string blackboardLog;
+            std::string message;
+            std::string currentStateName;
+            std::string targetStateName;
+        };
+
+        virtual void logImplementation(const Log& log) = 0;
     };
 } // namespace fsm

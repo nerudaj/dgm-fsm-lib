@@ -4,23 +4,31 @@
 fsm::CsvLogger::CsvLogger(const std::filesystem::path& logFilePath)
     : fileStream(logFilePath), outstream(fileStream)
 {
-    logImplementation(
-        "MachineId", "CurrentState", "Blackboard", "Message", "TargetState");
+    logHeaders();
 }
 
-void fsm::CsvLogger::logImplementation(
-    const std::string& fsmId,
-    const std::string& currentStateName,
-    const std::string& blackboardLog,
-    const std::string& message,
-    const std::string& targetState)
+fsm::CsvLogger::CsvLogger(std::ostream& stream) : outstream(stream)
+{
+    logHeaders();
+}
+
+void fsm::CsvLogger::logHeaders()
 {
     std::println(
         outstream,
-        "{},{},{},{},{}",
-        fsmId,
-        currentStateName,
-        blackboardLog,
-        message,
-        targetState);
+        "MachineId,BlackboardId,BlackboardLog,Message,CurrentStateName,"
+        "TargetStateName");
+}
+
+void fsm::CsvLogger::logImplementation(const Log& log)
+{
+    std::println(
+        outstream,
+        "{},{},{},{},{},{}",
+        log.machineId,
+        log.blackboardId,
+        log.blackboardLog,
+        log.message,
+        log.currentStateName,
+        log.targetStateName);
 }

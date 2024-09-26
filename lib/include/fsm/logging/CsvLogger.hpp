@@ -22,21 +22,15 @@ namespace fsm
          *
          *  \param stream  Any output stream (std::cout by default)
          */
-        explicit CsvLogger(std::ostream& stream = std::cout) noexcept
-            : outstream(stream)
-        {
-        }
+        explicit CsvLogger(std::ostream& stream = std::cout);
 
         CsvLogger(const CsvLogger&) = delete;
         CsvLogger(CsvLogger&&) = default;
 
     protected:
-        void logImplementation(
-            const std::string& fsmId,
-            const std::string& currentStateName,
-            const std::string& blackboardLog,
-            const std::string& message,
-            const std::string& targetState) override;
+        void logHeaders();
+
+        void logImplementation(const Log& log) override;
 
     private:
         std::ofstream fileStream;
