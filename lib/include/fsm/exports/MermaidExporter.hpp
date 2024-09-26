@@ -4,6 +4,7 @@
 #include <fsm/Types.hpp>
 #include <fsm/detail/BuilderContext.hpp>
 #include <fsm/detail/Constants.hpp>
+#include <fsm/detail/Helper.hpp>
 #include <fstream>
 #include <print>
 
@@ -65,9 +66,11 @@ namespace fsm
                 {
                     std::println(
                         save,
-                        "  {} -->|{}| {}",
+                        "  {} -->|submachine: {}| {}",
                         source,
-                        destination.primary,
+                        detail::getMachineAndStateNameFromFullName(
+                            destination.primary)
+                            .first,
                         destination.secondary);
                 }
             };
@@ -111,6 +114,7 @@ namespace fsm
         }
 
     private:
+        std::ofstream fileStream;
         std::ostream& save;
     };
 } // namespace fsm
