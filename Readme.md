@@ -2,16 +2,17 @@
 
 # fsm-cpp
 
-This is a C++ library meant for building and running Final State Machines, with the emphasis on their usage in videogame AI. While FSMs are quite simple structures to implement, the code usually quickly devolves into spaghetti mess. This library enforces one particular paradigm to how FSM should look like so the code can stay consistent and hopefully clean.
+This is a C++ library meant for building and running Final State Machines, with the emphasis on their usage in videogame AI. While FSMs are quite simple structures to implement, the code usually quickly devolves into a spaghetti mess. This library enforces one particular paradigm to how FSM should look like so the code can stay consistent and hopefully clean.
 
 ## Table of contents
 
  * [FSM architecture](#fsm-architecture)
  * [Integration](#integration)
  * [Building the FSM](#building-the-fsm)
+ * [Blackboards](#blackboards)
  * [Logging](#logging)
  * [Diagram exports](#diagram-exports)
- * [Who's using fsm-cpp?](#who-s-using-fsm-cpp)
+ * [Who's using fsm-cpp?](#whos-using-fsm-cpp)
 
 ## FSM architecture
 
@@ -89,7 +90,30 @@ auto&& machine = fsm::Builder<CsvBlackboard>()
     .build();
 ```
 
-Refer to [example code](examples/02-simple-fsm) for more info.
+Function callbacks that appear in "when/orWhen" statements must have the following signature: `bool(const CsvBlackboard&)` and callbacks that appear in "exec/otherwiseExec" have signature of `void(CsvBlackboard&)`. Thus you can only modify the contents of the blackboard in the latter.
+
+Refer to [example code](examples/02-simple-fsm/Main.cpp) for more info.
+
+## Blackboards
+
+To create a compatible blackboard, just do this:
+
+```c++
+#include <fsm/Types.hpp>
+
+struct Blackboard : fsm::BlackboardBase
+{
+	// Put your required properties here
+};
+```
+
+Please use `struct` instead of `class` or at least inherit publicly so the properties in the base struct are public. Do not prefix your attributes with double underscores, these should be reserved for the library.
+
+`fsm::BlackboardBase` contains the state of the FSM - what state should be ticked, call stack of sub-machines so it knows where to return, etc.
+
+The blackboard is subject to logging. By default, you'll only get its address for basic identification. If you want to log the contents of the blackboard, you need to specialize `std::formatter` for that purpose.
+
+Refer to [example code](examples/01-loggable-blackboard/Main.cpp) for minimal implementation of such specialization.
 
 ## Logging
 
