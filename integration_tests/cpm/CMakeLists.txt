@@ -6,7 +6,7 @@ set ( CMAKE_CXX_STANDARD 23 )
 
 project ( test-cpm )
 
-CPMAddPackage("gh:nerudaj/fsm-lib")
+CPMAddPackage("gh:nerudaj/fsm-lib#main")
 
 add_executable ( ${PROJECT_NAME} Main.cpp )
 
