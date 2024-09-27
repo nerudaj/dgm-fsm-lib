@@ -13,6 +13,9 @@ env:
 jobs:
   build:
     runs-on: windows-2022
+    strategy:
+      matrix:
+        case: [cpm, fetch_git, fetch_release]
 
     steps:
     - uses: actions/checkout@v4
@@ -23,7 +26,7 @@ jobs:
         cmake-version: '3.26.1'
 
     - name: Configure
-      working-directory: ${{env.IT_DIR}}/cpm
+      working-directory: ${{env.IT_DIR}}/${{matrix.case}}
       run: |
         mkdir _build
         cd _build
@@ -31,7 +34,7 @@ jobs:
       shell: cmd
 
     - name: Build
-      working-directory: ${{env.IT_DIR}}/cpm/_build
+      working-directory: ${{env.IT_DIR}}/${{matrix.case}}/_build
       run: |
         cmake --build . --config Debug
       shell: cmd
