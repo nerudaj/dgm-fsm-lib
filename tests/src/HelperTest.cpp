@@ -1,5 +1,5 @@
 #include "Blackboard.hpp"
-#include <catch2/catch_all.hpp>
+#include "catch_amalgamated.hpp"
 #include <fsm/detail/Helper.hpp>
 
 TEST_CASE("[Helper]")

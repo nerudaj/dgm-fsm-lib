@@ -1,6 +1,6 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
-#include <catch2/catch_all.hpp>
+#include "catch_amalgamated.hpp"
 #include <fsm/Builder.hpp>
 #include <fsm/exports/MermaidExporter.hpp>
 #include <fsm/logging/CsvLogger.hpp>

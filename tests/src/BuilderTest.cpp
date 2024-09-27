@@ -1,6 +1,6 @@
 #include "Blackboard.hpp"
 #include "CsvParser.hpp"
-#include <catch2/catch_all.hpp>
+#include "catch_amalgamated.hpp"
 #include <fsm/Builder.hpp>
 
 TEST_CASE("[Builder]")

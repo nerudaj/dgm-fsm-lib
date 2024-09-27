@@ -1,6 +1,6 @@
 #include "Blackboard.hpp"
 #include "TestableLogger.hpp"
-#include <catch2/catch_all.hpp>
+#include "catch_amalgamated.hpp"
 #include <fsm/logging/CsvLogger.hpp>
 
 TEST_CASE("[Logger]")
