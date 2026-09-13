@@ -79,6 +79,13 @@ class Program {
     }
 
     /**
+     * @param {string} message
+     */
+    log(message) {
+        console.log(`PROGRAM: ${message}`);
+    }
+
+    /**
      * @returns {{[key: string]: GraphStateIR}}
      */
     getCurrentStates() {
@@ -111,8 +118,8 @@ class Program {
         file.text()
             .then((jsonText) => {
                 const manifest = JSON.parse(jsonText);
-                console.log("Selected file:", file.name);
-                console.log("Parsed JSON:", manifest);
+                this.log(`Selected file: ${file.name}`);
+                this.log(`Parsed JSON: ${manifest}`);
                 this.ir.manifest = new ManifestModel(manifest);
 
                 // Update modals
@@ -133,8 +140,8 @@ class Program {
         file.text()
             .then((jsonText) => {
                 const model = JSON.parse(jsonText);
-                console.log("Selected file:", file.name);
-                console.log("Parsed JSON:", model);
+                this.log(`Selected file: ${file.name}`);
+                this.log(`Parsed JSON: ${model}`);
                 this.fsm = new FsmModel(model);
             })
             .catch((error) => {
@@ -224,7 +231,7 @@ class Program {
         const id = node.id();
         const x = node.position().x;
         const y = node.position().y;
-        console.log(`Updating position of ${id} to [${x}, ${y}]`);
+        this.log(`Updating position of ${id} to [${x}, ${y}]`);
         this.ir.updateStatePosition(id, x, y);
     }
 
@@ -233,6 +240,8 @@ class Program {
      * @param {string} actionName 
      */
     addNewState(stateName, actionName) {
+        this.log(`Adding state ${stateName} with action ${actionName}`);
+
         const id = this.ir.getNewStateId();
         this.getCurrentStates()[id] = new GraphStateIR(
             id,
@@ -243,7 +252,7 @@ class Program {
             { group: 'nodes', data: { id: id, label: `${stateName} (${actionName})` } },
         ]);
 
-        this.graph.layout({ name: 'cose' }).run();
+        //this.graph.layout({ name: 'cose' }).run();
     }
 
     /**
@@ -264,6 +273,8 @@ class Program {
             return;
         }
 
+        this.log(`Renaming state ${this.selectedState} to ${newName}`);
+
         this.snapshotAndExecute(() => {
             this.ir.updateStateProperties(
                 this.selectedState,
@@ -281,6 +292,8 @@ class Program {
             console.error("selected state is null");
             return;
         }
+
+        this.log(`Changing action of ${this.selectedState} to ${newAction}`);
 
         this.snapshotAndExecute(() => {
             this.ir.updateStateProperties(
@@ -300,6 +313,8 @@ class Program {
             return;
         }
 
+        this.log(`Changing destination of ${this.selectedState} to ${newDestination}`);
+
         this.snapshotAndExecute(() => {
             this.ir.updateStateProperties(
                 this.selectedState,
@@ -316,6 +331,14 @@ class Program {
                 }
             }])
         });
+    }
+
+    /**
+     * @param {string} conditionName 
+     * @param {string} destination 
+     */
+    onAddTransition(conditionName, destination) {
+
     }
 
     /**
