@@ -115,10 +115,10 @@ function openAddTransitionModal(transitionIdx) {
         return;
     }
 
-    populateSelectElement(
+    DomHelper.populateSelectElement(
         condSelect,
         program.ir.manifest.conditionNames.map(condName => ({ value: condName, label: condName })));
-    populateSelectElement(
+    DomHelper.populateSelectElement(
         destSelect,
         Object.entries(program.getCurrentStates()).map(([state, ir]) => ({ value: state, label: ir.name })));
 

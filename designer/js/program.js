@@ -105,7 +105,7 @@ class Program {
      * @param {HTMLSelectElement} select 
      */
     updateActionNameSelect(select) {
-        populateSelectElement(
+        DomHelper.populateSelectElement(
             select,
             this.ir.manifest.actionNames.map(actionName => ({ value: actionName, label: actionName })));
     }
@@ -114,7 +114,7 @@ class Program {
      * @param {HTMLSelectElement} select 
      */
     updateTransitionDestinationSelect(select) {
-        populateSelectElement(
+        DomHelper.populateSelectElement(
             select,
             this.getStateNamesInCurrentMachine());
     }
