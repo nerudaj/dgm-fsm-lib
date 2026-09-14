@@ -76,6 +76,25 @@ class Program {
 
         /** @type {ProgramHistory} */
         this.history = new ProgramHistory();
+
+        this.initTransitionListSorting();
+    }
+
+    initTransitionListSorting() {
+        const list = document.getElementById("EditState_TransitionList");
+        if (!list || !(list instanceof HTMLOListElement)) {
+            return;
+        }
+
+        new Sortable(list, {
+            animation: 150,
+            draggable: "li",
+            onEnd: () => {
+                if (this.selectedState) {
+                    this.updateSelectedState();
+                }
+            }
+        });
     }
 
     /**
