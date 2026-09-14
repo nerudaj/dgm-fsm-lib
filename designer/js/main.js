@@ -128,35 +128,23 @@ function openAddTransitionModal(transitionIdx) {
 }
 
 function addTransitionSelection() {
+    if (!program) return;
+
     var dom = document.getElementById("EditState_TransitionList");
 
     var li = document.createElement("li");
     li.className = "list-group-item";
 
-    var selFrom = document.createElement("select");
-    selFrom.className = "form-select mb-2 mb-md-0"; // simple stacking on small screens
-    selFrom.id = "EditState_TransitionFromSelect_" + Date.now();
+    var conditionSelect = document.createElement("select");
+    conditionSelect.className = "form-select mb-2 mb-md-0"; // simple stacking on small screens
+    conditionSelect.id = "EditState_TransitionFromSelect_" + Date.now();
 
-    var selTo = document.createElement("select");
-    selTo.className = "form-select";
-    selTo.id = "EditState_TransitionToSelect_" + Date.now();
+    var destinationSelect = document.createElement("select");
+    destinationSelect.className = "form-select";
+    destinationSelect.id = "EditState_TransitionToSelect_" + Date.now();
 
-    var placeholders = ["Placeholder 1", "Placeholder 2", "Placeholder 3"];
-
-    // TODO: redo as this
-    // DomHelper.populateSelectElement(selTo.id, placeholders);
-
-    placeholders.forEach((txt, idx) => {
-        var opt1 = document.createElement("option");
-        opt1.value = "from_" + idx;
-        opt1.textContent = txt;
-        selFrom.appendChild(opt1);
-
-        var opt2 = document.createElement("option");
-        opt2.value = "to_" + idx;
-        opt2.textContent = txt;
-        selTo.appendChild(opt2);
-    });
+    DomHelper.populateSelectElement(conditionSelect, program.ir.manifest.conditionNames.map(x => ({ value: x, label: x })));
+    DomHelper.populateSelectElement(destinationSelect, program.getStateNamesInCurrentMachine());
 
     // Layout wrapper (so the selects sit next to each other with "->" between)
     var row = document.createElement("div");
@@ -164,7 +152,7 @@ function addTransitionSelection() {
 
     var colFrom = document.createElement("div");
     colFrom.className = "col-12 col-md-5";
-    colFrom.appendChild(selFrom);
+    colFrom.appendChild(conditionSelect);
 
     var colArrow = document.createElement("div");
     colArrow.className = "col-12 col-md-2 text-center";
@@ -173,7 +161,7 @@ function addTransitionSelection() {
 
     var colTo = document.createElement("div");
     colTo.className = "col-12 col-md-5";
-    colTo.appendChild(selTo);
+    colTo.appendChild(destinationSelect);
 
     row.appendChild(colFrom);
     row.appendChild(colArrow);
@@ -221,6 +209,7 @@ function onEditStateActionChange(event) {
 /**
  * @param {any} event
  */
+// TODO: probably no longer used
 function onEditStateDestinationSelect(event) {
     if (!program) {
         console.error("Program is null");
@@ -232,7 +221,7 @@ function onEditStateDestinationSelect(event) {
 
 function applyChangesToState() {
     if (program) {
-        console.log(program.readEditStateModal());
+        program.updateSelectedState();
     }
 }
 

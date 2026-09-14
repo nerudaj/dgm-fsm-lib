@@ -93,6 +93,14 @@ class Program {
     }
 
     /**
+     * @returns {Array<{value: string, label: string}>}
+     */
+    getStateNamesInCurrentMachine() {
+        return Object.entries(this.getCurrentStates())
+            .map(([state, ir]) => ({ value: state, label: ir.name }));
+    }
+
+    /**
      * 
      * @param {HTMLSelectElement} select 
      */
@@ -108,7 +116,7 @@ class Program {
     updateTransitionDestinationSelect(select) {
         populateSelectElement(
             select,
-            Object.entries(this.getCurrentStates()).map(([state, ir]) => ({ value: state, label: ir.name })));
+            this.getStateNamesInCurrentMachine());
     }
 
     /**
@@ -334,11 +342,103 @@ class Program {
     }
 
     /**
-     * @param {string} conditionName 
-     * @param {string} destination 
-     */
-    onAddTransition(conditionName, destination) {
+ * Rebuilds the Cytoscape graph from the current GraphIR.
+ *
+ * Existing node positions are preserved when possible.
+ */
+    rebuildGraph() {
+        const states = this.getCurrentStates();
 
+        // Preserve positions before replacing graph elements.
+        const positions = {};
+
+        this.graph.nodes().forEach((node) => {
+            positions[node.id()] = {
+                x: node.position("x"),
+                y: node.position("y")
+            };
+        });
+
+        const nodes = [];
+        const edges = [];
+
+        for (const [stateId, state] of Object.entries(states)) {
+            nodes.push({
+                group: "nodes",
+                data: {
+                    id: stateId,
+                    label: `${state.name} (${state.actionName})`
+                },
+                position: positions[stateId] ?? {
+                    x: 100 + nodes.length * 250,
+                    y: 100
+                }
+            });
+
+            // Default transition.
+            if (state.destinationId) {
+                edges.push({
+                    group: "edges",
+                    data: {
+                        id: `${stateId}::default`,
+                        source: stateId,
+                        target: state.destinationId,
+                        label: "default"
+                    }
+                });
+            }
+
+            // Conditional transitions.
+            for (const [index, transition] of state.transitions.entries()) {
+                if (!transition.destinationId) {
+                    continue;
+                }
+
+                edges.push({
+                    group: "edges",
+                    data: {
+                        // The index makes parallel transitions unique.
+                        id: `${stateId}::transition::${index}`,
+                        source: stateId,
+                        target: transition.destinationId,
+                        label: transition.conditionName
+                    }
+                });
+            }
+        }
+
+        this.graph.elements().remove();
+        this.graph.add([...nodes, ...edges]);
+
+        // Reapply the positions explicitly. This also handles Cytoscape versions
+        // that do not preserve positions supplied in the element definition.
+        for (const node of nodes) {
+            const position = node.position;
+            this.graph.$id(node.data.id).position(position);
+        }
+
+        this.graph.fit(40);
+    }
+
+
+    /**
+     * @param {Array<FsmTransitionModel>} newTransitions
+     */
+    onSelectedStateTransitionsChange(newTransitions) {
+        if (!this.selectedState) {
+            console.error("selected state is null");
+            return;
+        }
+
+        this.log(`Updating transitions of ${this.selectedState}`);
+
+        this.snapshotAndExecute(() => {
+            this.ir.updateStateProperties(
+                this.selectedState,
+                null, newTransitions, null, null);
+
+            this.rebuildGraph();
+        });
     }
 
     /**
@@ -393,5 +493,42 @@ class Program {
         });
 
         return result;
+    }
+
+    updateSelectedState() {
+        if (!this.selectedState) {
+            console.error("program::updateSelectedState: selectedState is null");
+            return;
+        }
+
+        var formModel = this.readEditStateModal();
+        var selectedState = this.getCurrentStates()[this.selectedState];
+
+        if (selectedState.name != formModel.stateName)
+            this.onSelectedStateNameChange(formModel.stateName);
+
+        if (selectedState.actionName != formModel.actionName)
+            this.onSelectedStateActionChange(formModel.actionName);
+
+        if (selectedState.destinationId != formModel.destinationTargetName)
+            this.onSelectedStateDestinationChange(formModel.destinationTargetName);
+
+        var transitionsChanged = (() => {
+            if (selectedState.transitions.length != formModel.transitions.length)
+                return false;
+
+            for (var i = 0; i < selectedState.transitions.length; ++i) {
+                if (selectedState.transitions[i].conditionName != formModel.transitions[i].conditionName)
+                    return false;
+
+                if (selectedState.transitions[i].destinationId != formModel.transitions[i].destinationTargetName)
+                    return false;
+            }
+
+            return true;
+        })();
+
+        if (transitionsChanged)
+            this.onSelectedStateTransitionsChange(formModel.transitions);
     }
 }
