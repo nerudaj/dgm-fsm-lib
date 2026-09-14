@@ -89,44 +89,6 @@ function addState(e) {
     console.log("addState:end");
 }
 
-/**
- * @param {number} transitionIdx 
- */
-function openAddTransitionModal(transitionIdx) {
-    if (!program) {
-        console.error("Program is null");
-        return;
-    }
-
-    var condSelect = document.getElementById("EditTransition_ConditionSelect");
-    var destSelect = document.getElementById("EditTransition_DestinationSelect");
-    var indexInput = document.getElementById("EditTransition_Index");
-
-    if (!condSelect || !(condSelect instanceof HTMLSelectElement)) {
-        console.error("Condition select is either null or wrong type");
-        return;
-    }
-    else if (!destSelect || !(destSelect instanceof HTMLSelectElement)) {
-        console.error("Destination select is either null or wrong type");
-        return;
-    }
-    else if (!indexInput || !(indexInput instanceof HTMLInputElement)) {
-        console.error("Index input is either null or wrong type");
-        return;
-    }
-
-    DomHelper.populateSelectElement(
-        condSelect,
-        program.ir.manifest.conditionNames.map(condName => ({ value: condName, label: condName })));
-    DomHelper.populateSelectElement(
-        destSelect,
-        Object.entries(program.getCurrentStates()).map(([state, ir]) => ({ value: state, label: ir.name })));
-
-    indexInput.value = transitionIdx !== null ? transitionIdx.toString() : "";
-
-    showModal("EditTransitionModal");
-}
-
 function addTransitionSelection() {
     if (!program) return;
 
@@ -136,7 +98,7 @@ function addTransitionSelection() {
     li.className = "list-group-item";
 
     var conditionSelect = document.createElement("select");
-    conditionSelect.className = "form-select mb-2 mb-md-0"; // simple stacking on small screens
+    conditionSelect.className = "form-select mb-2 mb-md-0";
     conditionSelect.id = "EditState_TransitionFromSelect_" + Date.now();
 
     var destinationSelect = document.createElement("select");
@@ -146,7 +108,6 @@ function addTransitionSelection() {
     DomHelper.populateSelectElement(conditionSelect, program.ir.manifest.conditionNames.map(x => ({ value: x, label: x })));
     DomHelper.populateSelectElement(destinationSelect, program.getStateNamesInCurrentMachine());
 
-    // Layout wrapper (so the selects sit next to each other with "->" between)
     var row = document.createElement("div");
     row.className = "row g-2 align-items-center";
 
@@ -167,19 +128,8 @@ function addTransitionSelection() {
     row.appendChild(colArrow);
     row.appendChild(colTo);
 
-    // Add to li and append to DOM
     li.appendChild(row);
     dom.appendChild(li);
-}
-
-/**
- * @param {any} e 
- */
-function saveTransition(e) {
-    if (!program) {
-        console.error("Program is null");
-        return;
-    }
 }
 
 /**
@@ -206,37 +156,10 @@ function onEditStateActionChange(event) {
     program.onSelectedStateActionChange(event.target.value);
 }
 
-/**
- * @param {any} event
- */
-// TODO: probably no longer used
-function onEditStateDestinationSelect(event) {
-    if (!program) {
-        console.error("Program is null");
-        return;
-    }
-
-    program.onSelectedStateDestinationChange(event.target.value);
-}
-
 function applyChangesToState() {
     if (program) {
         program.updateSelectedState();
     }
-}
-
-/**
- * @param {string} id 
- */
-function showModal(id) {
-    const modalElement = document.getElementById(id);
-    if (!modalElement) {
-        console.error("Modal element not found.");
-        return;
-    }
-
-    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-    modal.show();
 }
 
 function main() {
